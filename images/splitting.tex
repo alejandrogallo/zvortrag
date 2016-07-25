@@ -1,0 +1,84 @@
+\documentclass[]{article}
+
+\usepackage{verbatim}
+\usepackage{tikz}
+\usepackage[active,tightpage]{preview}
+\usetikzlibrary{shapes,calc}
+\usetikzlibrary{shapes.callouts}
+\usetikzlibrary{decorations.pathmorphing}
+\usetikzlibrary{arrows}
+
+\usepackage{sansmath}
+
+
+
+\begin{document}
+  \begin{preview}
+  \begin{tikzpicture}[ scale=0.5, level/.style={very thick} ]
+
+    \pgfmathsetmacro{\headerheight}{11}
+    \tikzset{
+      font=\sffamily,
+      photon/.style={<->,decorate, decoration={snake}, draw=red,
+      line width=0.4mm,>=triangle 60},
+      rotdis/.style={<->,decorate, draw=red,thick},
+      ghost/.style={gray,dashed,thin}
+    }
+
+    \pgfmathsetmacro{\degensep}{.1}
+
+    %  Main level {{{1  %
+    %%%%%%%%%%%%%%%%%%%%%
+    \draw[level] (3, 6) -- (5, 6)node at (3,6)[left]{$^{3}A_{2}$};
+    %main level ghost
+    \draw[gray,ghost](5,6)--(17,6);
+
+
+    %  Spin spin {{{1  %
+    %%%%%%%%%%%%%%%%%%%%
+
+    \draw[](8,\headerheight)node[font=\large]{
+      $ \hat{ \mathbf{S}}^{t} \mathsf{D} \hat{ \mathbf{S}} $ 
+    };
+% Draw the energy levels.
+    \draw[level,ghost] ( 5, 6) -- ( 6, 7.5);
+    \draw[level,ghost] ( 5, 6) -- ( 6, 0);
+    \draw[level] ( 6, 7.5) -- ( 10, 7.5)
+      node[midway,above]{ $ x,y $ };
+    \draw[level] ( 6, 0) -- ( 10, 0)
+      node[midway,below]{ $ z\ (m_{s}=0) $ };
+
+
+    \draw[rotdis] (7,7.5) -- (7,6)
+      node[right=1em,midway]{$E$};
+    \draw[rotdis] (7,6) -- (7,0)
+      node[right=1em,midway]{$D$};
+    %\draw[blue] (10.,9)node{F};
+
+
+    \draw[level,ghost] ( 10, 0) -- ( 13, 0);
+
+    \draw[level,ghost] ( 10, 7.5) -- ( 12, 7.5);
+    \draw[level,ghost] ( 12, 7.5)--( 13, 8.2) ;
+    \draw[level,ghost] ( 13, 6.8)--( 12, 7.5) ;
+
+    %  Zeeman {{{1  %
+    %%%%%%%%%%%%%%%%%
+
+    %\draw[level,blue] ( 13, 7.5) -- ( 17, 7.5)node[right]{\ 0};
+    \draw[level] ( 13, 8.2) -- ( 17, 8.2)node[right]{$ x $ };
+    \draw[level] ( 13, 6.8) -- ( 17, 6.8)node[right]{$ y $ };
+    \draw[level] ( 13, 0) -- ( 17, 0)
+      node[midway,below]{ $ z\ (m_{s}=0) $ };
+    \draw[](15,\headerheight)node[font=\large]{\textbf{Zeeman/strain}};
+
+
+
+
+  \end{tikzpicture}
+  \end{preview}
+\end{document}
+
+
+
+% vim:spell ft=tex nospell fdm=marker:
