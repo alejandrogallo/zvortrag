@@ -1,7 +1,7 @@
 %   preamble {{{1  %
 %%%%%%%%%%%%%%%%%%%%
 
-\documentclass[handout]{beamer}
+\documentclass[]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
@@ -95,7 +95,7 @@ Reproduce and obtain classical results for nitrogen vacancy impurity complexes i
 
 \begin{frame}{Transitions}
   \begin{center}
-    \includegraphics[width=0.5\textwidth]{images/splitting.pdf}
+    \includegraphics[width=0.9\textwidth]{images/splitting.pdf}
   \end{center}
 \end{frame}
 
@@ -142,6 +142,7 @@ Reproduce and obtain classical results for nitrogen vacancy impurity complexes i
       The exchange correlation potential
       $ E^{ \mathrm{exact}}_{ \mathrm{xc}} [ \rho ] $
       determines the DFT \textit{flavor}.
+      In many calculation we use the so-called \textbf{PBE} \textit{(Perdew-Burke-Ernzerhof)} functional.
   \end{itemize}
 \end{frame}
 
@@ -218,6 +219,73 @@ Reproduce and obtain classical results for nitrogen vacancy impurity complexes i
   \end{center}
 \end{frame}
 
+
+
+
+
+
+
+
+\begin{frame}{ $ \mathsf{NV}^{-} $: Vibronic scheme (PBE + 128 atomic cell)}
+
+  \begin{center}
+    \includegraphics<1>[width=.5\textwidth]{images/vibronic.pdf}
+  \end{center}
+
+  \only<2>{
+    \begin{columns}
+      \begin{column}{0.3333\textwidth}
+        \centering
+        \textit{Cubic }
+        \includegraphics[width=1\textwidth, trim=0 0 0em 0,clip]{images/abcd/abcd_128_zinc.pdf}
+      \end{column}
+      \begin{column}{0.3333\textwidth}
+        \centering
+        \textit{Hexagonal $ x $ }
+        \includegraphics[width=1\textwidth, trim=0 0 0em 0,clip]{images/abcd/abcd_128_z.pdf}
+      \end{column}
+      \begin{column}{0.3333\textwidth}
+        \centering
+        \textit{Hexagonal $ z $ }
+        \includegraphics[width=1\textwidth, trim=0 0 0em 0,clip]{images/abcd/abcd_128_x.pdf}
+      \end{column}
+    \end{columns}
+  }
+  \only<3->{
+    \begin{columns}
+      \begin{column}{0.3333\textwidth}
+        \centering
+        \textit{Cubic }
+        \includegraphics[width=1\textwidth, trim=0 0 0em 0,clip]{images/abcd/abcd_128_zinc.pdf}
+      \end{column}
+      \begin{column}{0.3333\textwidth}
+        \begin{center}
+          \small
+          \begin{tabular}{lc}
+            \hline
+            \multicolumn{2}{c}{Experimental data}\\
+            \hline
+            ZPL & 1.945\\
+            \hline
+            $ ^3A_2 \to ^3E^{*} $  & 2.180\\
+            \hline
+            $ S $  & 0.235\\
+            \hline
+            $ ^3E^{*} \to ^3E $  & 1.760\\
+            \hline
+            $ AS $  & 0.185\\
+            \hline
+          \end{tabular}
+        \end{center}
+      \end{column}
+      \begin{column}{0.3333\textwidth}
+        \centering
+        \textit{Hexagonal $ z $ }
+        \includegraphics[width=1\textwidth, trim=0 0 0em 0,clip]{images/abcd/abcd_128_x.pdf}
+      \end{column}
+    \end{columns}
+    }
+  \end{frame}
 
 \begin{frame}{Expanding the defect}
   \begin{center}
