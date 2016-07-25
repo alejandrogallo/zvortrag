@@ -59,7 +59,7 @@ replot
 
 set label font ",20"
 set tics font ",20"
-set terminal wxt font ",12"
+#set terminal wxt font ",12"
 replot
 
 
