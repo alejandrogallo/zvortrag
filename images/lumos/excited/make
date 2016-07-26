@@ -1,0 +1,13 @@
+#! /usr/bin/env bash
+
+
+for i in ./N*; do
+  echo "$i"
+  smye $i --asy --all 7 7 > $i.asy
+done
+
+
+
+
+#vim-run: rm *.asy ; rm *.pdf ; bash %
+# vim: ft=sh
