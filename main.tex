@@ -336,10 +336,26 @@ Reproduce and obtain classical results for nitrogen vacancy impurity complexes i
 \end{frame}
 
 
+  
+\begin{frame}{Ground state example: $ \mathsf{GeV}^{-} $ }
+  \begin{center}
+    \begin{columns}
+      \begin{column}{0.3\textwidth}
+        \includegraphics[height=1\textheight]{images/lumos/Ge_minus_cubic_128_dmatrix_encut_lumos.pdf}
+      \end{column}
+      \begin{column}{0.3\textwidth}
+        \includegraphics[height=1\textheight]{images/lumos/Ge_minus_hexagonal_z_128_dmatrix_encut_lumos.pdf}
+      \end{column}
+      \begin{column}{0.3\textwidth}
+        \includegraphics[height=1\textheight]{images/lumos/Ge_minus_hexagonal_x_128_dmatrix_encut_lumos.pdf}
+      \end{column}
+    \end{columns}
+  \end{center}
+\end{frame}
 
 
 
-\section{Summary} %{{{1
+\section{Summary and outlook} %{{{1
 
 
 
@@ -350,11 +366,27 @@ Reproduce and obtain classical results for nitrogen vacancy impurity complexes i
     \item ZPL calculation.
     \item ZFS tensor calculation.
     \item \textbf{Beyond the Ground state:}\\
-      Using DMRG for excited state calculations
+      Using DMRG (\textit{Density Matrix Renormalization Group}) for excited state calculations
   \end{itemize}
 \end{frame}
 
 
+\begin{frame}{Using DMRG for excited state calculations}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+        \item $ \mathsf{XV}^{q} $ as molecules.
+        \item Localized states as isolated.
+        \item Issues like charge transfer, charge corrections.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \textit{ $ \mathsf{NV}^{+} $ }
+      \includegraphics[clip, trim=2cm 0 2cm 0, width=1.0\textwidth]{images/nv_plus_orbitals_example.png}
+    \end{column}
+  \end{columns}
+\end{frame}
 
 
 \plain{Thank you!}

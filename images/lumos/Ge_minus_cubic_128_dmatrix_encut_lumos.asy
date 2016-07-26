@@ -1,6 +1,6 @@
 
 
-string LUMO_TITLE="Ge-minus-cubic-128-dmatrixencut";
+string LUMO_TITLE="\sf \Huge Cubic";
 
 real ENERGIE_LB_PRISTINE   = 17.1560 ;
 real ENERGIE_VB_PRISTINE   = 12.7456 ;
@@ -98,7 +98,7 @@ struct state {
 real pointsToEnergy ( real point ){
   return (ENERGIE_LB_PRISTINE-ENERGIE_VB_PRISTINE)*point/100 + ENERGIE_VB_PRISTINE;
 };
-label(LUMO_TITLE, (25, 100+KANTEN_HEIGHT/1.1), 0.8*blue);
+label(LUMO_TITLE, (25, 100+KANTEN_HEIGHT/1.5), black);
 draw((50,0)--(50,100),dashed, Arrows);
 label((string)(ENERGIE_LB_PRISTINE-ENERGIE_VB_PRISTINE)+" eV", (50,50), Fill(white));
 
