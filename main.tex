@@ -1,7 +1,7 @@
 %   preamble {{{1  %
 %%%%%%%%%%%%%%%%%%%%
 
-\documentclass[]{beamer}
+\documentclass[notes=show]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
@@ -18,7 +18,7 @@
 
 
 
-\title{
+\title[Ab initio studies \ldots]{
   \includegraphics[width=2cm, keepaspectratio]{images/max_planck.png}
  \hfill
   \includegraphics[width=1.4cm, keepaspectratio]{images/logo_andreas.png} \\
@@ -34,7 +34,6 @@
   \textbf{Advisor}: Dr. Andreas G\"uneis
 }
 
-\setbeameroption{show notes}
 
 \begin{document}
 
@@ -44,8 +43,34 @@
 
 \maketitle
 
+\note{
+
+  Hello my name is Alejandro and I am currently working on my master
+  thesis project entitled:\\ \textit{Ab initio studies of
+  vacancy-impurity complexes in cubic and hexagonal diamond}\\ The
+  supervision of the project is conducted by Dr. Andreas Grueneis , head
+  of group at the MPI for solid state research. We engaged in this
+  project as a joint collaboration with the third physical institute of
+  this University, which is led by Prof. Joerg Wrachtrup.
+
+}
+
 \begin{frame}{Contents}
 \tableofcontents
+
+\note{
+
+  In the following we will provide some basic background
+  in the field of vacancy-impurity complexes and
+  we will quickly introduce some of the techniques used
+  to model and calculate their electronic properties.
+
+  The main systems of this work will be introduced
+  and we will finish by giving a quick outlook into
+  the possible future directions that this research could
+  be led into.
+
+}
 
 \end{frame}
 
@@ -54,26 +79,54 @@
 
 \section{Aim and scope of the work} %{{{1
 \begin{frame}{Aims}
-\begin{itemize}
-  \item<1->
-Exploration of defect centres using state-of-the-art ab-initio theories.
-  \item<2->
-Reproduce and obtain classical results for nitrogen vacancy impurity complexes in diamond.
-  %\item<3->
-%What is the state of the art of ab-initio theories?
-  %\item<4->
-%How can ab-initio methods help in understanding and improving their
-%properties?
-\end{itemize}
+  \begin{itemize}
+    \item
+      Exploration of defect centres using state-of-the-art ab-initio theories.
+    \item
+      Reproduce and obtain classical results for nitrogen vacancy impurity complexes in diamond.
+  \end{itemize}
+
+  \note{
+
+    So the main aim of this work is to computationally
+    treat electronic properties of defect centers in diamond
+    using state-of-the-art ab initio theories.
+
+    Through this exploration we hope to recover many well-known
+    experimentally verified quantities.
+
+    In order to do this we use several purely theoretical
+    results to orient our calculations into the right direction.
+    (e.g. Markus' Gruppentheorierechnungne)
+
+  }
+
 \end{frame}
+
 
 \section{Introduction} %{{{1
 
 
-\begin{frame}{Nitrogen Vacancy Centre in diamond}
+\begin{frame}{Nitrogen Vacancy Centre in diamond (NV center)}
   \begin{center}
     \includegraphics[width=0.9\textwidth]{images/POSCAR_16_view.png}
   \end{center}
+
+  \note{
+
+    So let us just begin by firstly introducing the main
+    actor in this story. This is the Nitrogen vacancy impurity
+    center in diamond, as most of you may be already know.
+    The big red region is a vacant carbon site and next to
+    it lies a nitrogen atom.
+
+    This kind of defects have been known now for almost 50 years.
+    However it was not until the late nineties when single negatively
+    charged NV centres where found. This enabled the demonstration
+    of photo stable single photon emitters, which is of course
+    of huge importance for quantum optics.
+
+  }
 \end{frame}
 
 \begin{frame}{Main level overview: $ \mathsf{NV}^{-} $ }
@@ -146,7 +199,7 @@ Reproduce and obtain classical results for nitrogen vacancy impurity complexes i
       The exchange correlation potential
       $ E^{ \mathrm{exact}}_{ \mathrm{xc}} [ \rho ] $
       determines the DFT \textit{flavor}.
-      In many calculation we use the so-called \textbf{PBE} \textit{(Perdew-Burke-Ernzerhof)} functional.
+      In many calculations we use the so-called \textbf{PBE} \textit{(Perdew-Burke-Ernzerhof)} functional.
   \end{itemize}
 \end{frame}
 
