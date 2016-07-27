@@ -1,7 +1,7 @@
 %   preamble {{{1  %
 %%%%%%%%%%%%%%%%%%%%
 
-\documentclass[notes=show]{beamer}
+\documentclass[notes=hide]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
@@ -187,16 +187,59 @@
 
 \end{frame}
 
-\begin{frame}{Transitions}
+\begin{frame}{Zero Field Splitting (ZFS)}
   \begin{center}
-    \includegraphics[width=0.9\textwidth]{images/splitting.pdf}
+    \includegraphics[width=0.9\textwidth]{images/splitting.pdf}\\
+    \textbf{\color{red} REVISE E AND D}
   \end{center}
+
+  \note{
+
+    Another important aim of our project is to calculate
+    correctly the zero field splitting of the energy levels.
+
+    In this case we are interested in the splitting that
+    arises from the Spin-Spin interaction of the electrons.
+    This splits into up to three levels the triplet state.
+    This splitting is characterised by two parameters,
+    $ E $  and $ D $.
+
+    The splitting also arises through strain of the material
+    and Zeeman splitting.
+
+
+  }
+
 \end{frame}
 
 \begin{frame}{Transitions overview: $ \mathsf{NV}^{-} $ }
   \begin{center}
     \includegraphics[width=0.9\textwidth]{images/NV_minus_transitions.pdf}
   \end{center}
+
+  \note{
+
+  One of the main uses that these levels have in common applications of
+  the NV center is best understood by the following diagram. In it we
+  see the triplets on the left with a splitting in place and the singlet
+  states on the right.
+
+  To understand this diagram imagine that the level population
+  of the $ m_{s} = 0 $ in the $ ^3A_{2} $ state is much higher
+  than the $ x,y $ split states of the same state.
+  If we radiate with the right frequency of the energy difference
+  between both triplet states, then a non radiative transition
+  brings the system into the singlet state, where a radiative
+  transition happens. In both possible cases, radiation is produced,
+  therefore a detector would take a hold of this radiation.
+
+  If the whole population is however in the upper $ x,y $ states,
+  when radiating, since the non radiative transition to the singlet
+  states is strong, less radiation will be produced and the detector
+  will identify the signal as being darker.
+
+  }
+
 \end{frame}
 
 
@@ -209,6 +252,31 @@
       \includegraphics[width=1\textwidth]{images/vibronic.pdf}
     \end{column}
   \end{columns}
+
+  \note{
+
+  To interpret quantitatively some experiments the previous
+  picture falls short in some regards.
+
+  Every electronic state is dependent on the ionic constellation.
+  This gives rise to the so-called vibronic states.
+  For example the ground state has associated with it a given
+  ionic constellation. Through excitation to the upper lying
+  triplet state since the dynamic of the electrons is much
+  faster than the ionic one, the constellation first stays
+  static and then relaxes because the potential landscape
+  changed due to the difference in the electronic density.
+
+  This gives rise to two different excited states, which
+  must be considered in order to reproduce experimental data.
+
+  A very important quantity in this respect is the so-called
+  zero phonon line, which as its name indicates characterises
+  the transition of the ground relaxed state to the higher
+  relaxed state.
+
+  }
+
 \end{frame}
 
 \begin{frame}{Density functional theory (DFT)}
