@@ -1,7 +1,7 @@
 %   preamble {{{1  %
 %%%%%%%%%%%%%%%%%%%%
 
-\documentclass[notes=hide]{beamer}
+\documentclass[notes=show]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
@@ -78,13 +78,36 @@
 
 
 \section{Aim and scope of the work} %{{{1
-\begin{frame}{Aims}
+\begin{frame}{Aims and motivation}
   \begin{itemize}
+
     \item
-      Exploration of defect centres using state-of-the-art ab-initio theories.
+      Exploration of defect centres using state-of-the-art ab-initio
+      theories.
+
     \item
-      Reproduce and obtain classical results for nitrogen vacancy impurity complexes in diamond.
+      Benchmark ab initio theories with well-known
+      experimental data.
+
+    \item
+      Systematic characterisation of defect fingerprints: ZFS, ZPL.
+
+    \item
+      Search for new defects with tailored properties.
+
+
   \end{itemize}
+
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+  \begin{center}
+    \includegraphics[width=1\textwidth]{images/POSCAR_16_view.png}
+  \end{center}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+
+    \end{column}
+  \end{columns}
 
   \note{
 
@@ -283,10 +306,11 @@
   \textit{``$ \it \Psi  $  contains too much information''}
   \hfill \textit{- Popular saying}
   \begin{itemize}
-    \item The exact electronic ground state of a system is only dependent on
-      the electronic density $ \rho $ .
     \item In principle, DFT delivers the \textbf{exact ground state}.
-    \item All quantities written in terms of $ \rho $ (functional formalism).
+    %\item The exact electronic ground state of a system is only dependent on
+      %the electronic density $ \rho $ .
+
+    \item All quantities are written in terms of $ \rho $ (functional formalism).
     \item E.g.:
       \[
         E[ \rho ] =
@@ -309,8 +333,6 @@
 \end{frame}
 
 
-%\begin{frame}{Projector-augmented wave (PAW) method}
-%\end{frame}
 
 
 \section{Hexagonal diamond and defects} %{{{1
@@ -331,39 +353,25 @@
       Hexagonal $ z $-type & \includegraphics[width=0.4\textwidth]{images/POSCAR_16_z_view.png}
     \end{tabular}
   \end{center}
-
 \end{frame}
 
 
 
-\begin{frame}{Split vacancies: $ \mathsf{SiV}^{-} $  }
-  \def\splitTrim{6}
-  \def\splitTrimVertical{2}
-  \begin{columns}
-    \begin{column}{0.5\textwidth}
-      \includegraphics[width=\textwidth, keepaspectratio,trim=\splitTrim cm \splitTrimVertical cm \splitTrim cm \splitTrimVertical cm,clip]{images/poscar__si_minux_definitiv_1.pdf}
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \includegraphics[width=\textwidth, keepaspectratio,trim=\splitTrim cm \splitTrimVertical cm \splitTrim cm \splitTrimVertical cm,clip]{images/contcar__si_minux_definitiv_1_cartesian.pdf}
-    \end{column}
-  \end{columns}
-\end{frame}
+%\begin{frame}{Split vacancies: $ \mathsf{SiV}^{-} $  }
+  %\def\splitTrim{6}
+  %\def\splitTrimVertical{2}
+  %\begin{columns}
+    %\begin{column}{0.5\textwidth}
+      %\includegraphics[width=\textwidth, keepaspectratio,trim=\splitTrim cm \splitTrimVertical cm \splitTrim cm \splitTrimVertical cm,clip]{images/poscar__si_minux_definitiv_1.pdf}
+    %\end{column}
+    %\begin{column}{0.5\textwidth}
+      %\includegraphics[width=\textwidth, keepaspectratio,trim=\splitTrim cm \splitTrimVertical cm \splitTrim cm \splitTrimVertical cm,clip]{images/contcar__si_minux_definitiv_1_cartesian.pdf}
+    %\end{column}
+  %\end{columns}
+%\end{frame}
 
-%\subsection*{XV-centers in cubic and hexagonal diamond}
 
 \section{Results} %{{{1
-
-\begin{frame}{$ \mathsf{NV}^{-} $: ZFS }
-  \begin{itemize}
-    \item
-      \textit{Cubic diamond, convergence and comparison with the experimental result.}
-  \end{itemize}
-  \includegraphics[width=1.0\textwidth, trim=0 0 0em 0,clip]{images/zfs_cubic/plot_cubic.pdf}
-\end{frame}
-
-\begin{frame}{$ \mathsf{NV}^{*} $: ZFS cubic ($ \mathsf{NV}^{*}_{c} $), Hexagonal $ x,z $ ($ \mathsf{NV}_{x,z}^{*} $)   }
-  \includegraphics[width=1.0\textwidth, trim=0 0 0em 0,clip]{images/splitting_comparison/dmatrix_encut/N_all.pdf}
-\end{frame}
 
 \begin{frame}{ $ \mathsf{NV}^{-} $: Ground state $ ^3A_{2} $ }
   \begin{center}
@@ -396,6 +404,20 @@
     \end{columns}
   \end{center}
 \end{frame}
+
+\begin{frame}{$ \mathsf{NV}^{-} $: ZFS }
+  \begin{itemize}
+    \item
+      \textit{Cubic diamond, convergence and comparison with the experimental result.}
+  \end{itemize}
+  \includegraphics[width=1.0\textwidth, trim=0 0 0em 0,clip]{images/zfs_cubic/plot_cubic.pdf}
+\end{frame}
+
+\begin{frame}{$ \mathsf{NV}^{*} $: ZFS cubic ($ \mathsf{NV}^{*}_{c} $), Hexagonal $ x,z $ ($ \mathsf{NV}_{x,z}^{*} $)   }
+  \includegraphics[width=1.0\textwidth, trim=0 0 0em 0,clip]{images/splitting_comparison/dmatrix_encut/N_all.pdf}
+\end{frame}
+
+
 
 
 
