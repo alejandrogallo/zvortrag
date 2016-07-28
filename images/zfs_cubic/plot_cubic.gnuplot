@@ -3,7 +3,7 @@ set terminal unknown
 set datafile separator ";"
 
 set tics font ",16"
-set ytics add ("Exp.\n (2.88)" 2.88)
+set ytics add ("Exp. (D)\n (2.88)" 2.88)
 set grid
 set autoscale x
 set autoscale y
