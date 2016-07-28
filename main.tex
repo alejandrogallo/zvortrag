@@ -1,11 +1,12 @@
 %   preamble {{{1  %
 %%%%%%%%%%%%%%%%%%%%
 
-%\documentclass[notes=show]{beamer}
-\documentclass[notes=hide]{beamer}
+\documentclass[notes=show]{beamer}
+%\documentclass[notes=hide]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
+\usepackage[]{tikz}
 
 %  beamer theme {{{1  %
 %%%%%%%%%%%%%%%%%%%%%%%
@@ -32,7 +33,7 @@
 \author{Alejandro Agustí Martínez-Soria Gallo}
 \institute{
   Max-Planck Institute for solid state research\\
-  \textbf{Advisor}: Prof. Dr. Andreas G\"uneis
+  \textbf{Advisor}: Prof. Dr. Andreas Gr\"uneis
 }
 
 
@@ -432,19 +433,25 @@
 \section{Results} %{{{1
 
 \begin{frame}{ $ \mathsf{NV}^{-} $: Ground state $ ^3A_{2} $ }
-  \begin{center}
-    \begin{columns}
-      \begin{column}{0.3\textwidth}
-        \includegraphics[height=1\textheight]{images/lumos/N_minus_cubic_128_dmatrix_encut_lumos.pdf}
-      \end{column}
-      \begin{column}{0.3\textwidth}
-        \includegraphics[height=1\textheight]{images/lumos/N_minus_hexagonal_z_128_dmatrix_encut_lumos.pdf}
-      \end{column}
-      \begin{column}{0.3\textwidth}
-        \includegraphics[height=1\textheight]{images/lumos/N_minus_hexagonal_x_128_dmatrix_encut_lumos.pdf}
-      \end{column}
-    \end{columns}
-  \end{center}
+    \begin{tikzpicture}
+      \node at (0,0) {
+          \begin{columns}
+            \begin{column}{0.3\textwidth}
+              \includegraphics[height=1\textheight]{images/lumos/N_minus_cubic_128_dmatrix_encut_lumos.pdf}
+            \end{column}
+            \begin{column}{0.3\textwidth}
+              \includegraphics[height=1\textheight]{images/lumos/N_minus_hexagonal_z_128_dmatrix_encut_lumos.pdf}
+            \end{column}
+            \begin{column}{0.3\textwidth}
+              \includegraphics[height=1\textheight]{images/lumos/N_minus_hexagonal_x_128_dmatrix_encut_lumos.pdf}
+            \end{column}
+          \end{columns}
+        };
+      \node<2-> [fill,blue!20] at (0.23,1.5) {
+        \includegraphics[height=0.4\textheight]{images/basic_level_definition_with_spin.pdf}
+        };
+      \end{tikzpicture}
+
 \end{frame}
 
 
