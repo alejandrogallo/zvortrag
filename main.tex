@@ -256,7 +256,7 @@
 \begin{frame}{Zero Field Splitting (ZFS)}
   \begin{center}
     \includegraphics[width=0.9\textwidth]{images/splitting.pdf}\\
-    \textbf{\color{red} REVISE E AND D}
+    %\textbf{\color{red} REVISE E AND D}
   \end{center}
 
   \note{
@@ -365,15 +365,15 @@
   \textit{``$ \it \Psi  $  contains too much information''}
   \hfill \textit{- Popular saying}
   \begin{itemize}
-    \item In principle, DFT delivers the \textbf{exact ground state}.
+    \item In principle, DFT delivers the \textbf{exact ground state properties}.
     %\item The exact electronic ground state of a system is only dependent on
       %the electronic density $ \rho $ .
 
     \item All quantities are written in terms of $ \rho $ (functional formalism).
     \item E.g.:
-      \[
-        E[ \rho ] =
-        T_{s} [ \rho  ]
+      \begin{align*}
+        &E[ \rho ] =\\
+        &T_{s} [ \rho  ]
         +
         \int  V ( \mathbf{r} ) \rho ( \mathbf{r} ) \ \mathrm{d} \mathbf{r}
         +
@@ -382,10 +382,10 @@
         \frac{\rho ( \mathbf{r} ) \rho ( \mathbf{r}' )}{| \mathbf{r} - \mathbf{r}'|}
         \ \mathrm{d} \mathbf{r}\mathrm{d} \mathbf{r}'
         +
-        E^{ \mathrm{exact}}_{ \mathrm{xc}} [ \rho ]
-      \]
+        E^{ \mathrm{exact}}_{ \mathrm{xc}} [ \rho, \nabla \rho  ]
+      \end{align*}
       The exchange correlation potential
-      $ E^{ \mathrm{exact}}_{ \mathrm{xc}} [ \rho ] $
+      $ E^{ \mathrm{exact}}_{ \mathrm{xc}} [ \rho , \nabla \rho  ] $
       determines the DFT \textit{flavor}.
       In many calculations we use the so-called \textbf{PBE} \textit{(Perdew-Burke-Ernzerhof)} functional.
   \end{itemize}
@@ -397,12 +397,12 @@
 \section{Hexagonal diamond and defects} %{{{1
 
 
-\begin{frame}{Hexagonal diamond}
-  \begin{center}
-    \includegraphics[width=0.5\textwidth, trim=0 0 30em 0,clip]{images/poscar_hex_16_hex-view.png}\\
-    \includegraphics[width=0.5\textwidth, trim=0 0 27em 0,clip]{images/poscar_hex_16_birdseye.png}
-  \end{center}
-\end{frame}
+%\begin{frame}{Hexagonal diamond}
+  %\begin{center}
+    %\includegraphics[width=0.5\textwidth, trim=0 0 30em 0,clip]{images/poscar_hex_16_hex-view.png}\\
+    %\includegraphics[width=0.5\textwidth, trim=0 0 27em 0,clip]{images/poscar_hex_16_birdseye.png}
+  %\end{center}
+%\end{frame}
 
 \begin{frame}{Defected hexagonal diamond}
   \begin{center}

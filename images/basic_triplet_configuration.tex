@@ -33,31 +33,30 @@
   %%%%%%%%%%%%%%%%%%
   
 
-  \pgfmathsetmacro{\bandGap}{7.5}
+  \pgfmathsetmacro{\bandGap}{5.5}
   \pgfmathsetmacro{\bandHeight}{2}
   \pgfmathsetmacro{\bandWidth}{9}
   \pgfmathsetmacro{\levelwidth}{\bandWidth/2.5}
   \pgfmathsetmacro{\levelSeparation}{2}
   \pgfmathsetmacro{\arrowHeight}{1.3}
 
-
+  
   %  Level A2 {{{1  %
   %%%%%%%%%%%%%%%%%%%
-
+  
 
   \coordinate (Origin) at (0, 0);
   \coordinate (a1) at
-    ($(Origin)+(\bandWidth/2-\levelwidth/2 ,\bandHeight+\levelSeparation )$);
+    ($(Origin)+(\bandWidth/2-\levelwidth/2 ,0.5*\bandHeight )$);
   \coordinate (a2) at
-    ($(Origin)+(\bandWidth/2-\levelwidth/2 ,\bandHeight+2*\levelSeparation )$);
+    ($(Origin)+(\bandWidth/2-\levelwidth/2 ,\bandHeight+1*\levelSeparation )$);
   \coordinate (e1) at
-    ($(Origin)+(\bandWidth/3-2*\levelwidth/3 ,\bandHeight+3*\levelSeparation )$);
+    ($(Origin)+(\bandWidth/3-2*\levelwidth/3 ,\bandHeight+2*\levelSeparation )$);
   \coordinate (e2) at
     ($(e1)+(\bandWidth/3+1*\levelwidth/3 ,0)$);
 
   \fill [orange] (Origin)
-    rectangle +(\bandWidth,\bandHeight)
-    node[black,pos=.5] { Valence Band };
+    rectangle +(\bandWidth,\bandHeight);
   \fill [orange] ($(Origin)+(0,\bandHeight+\bandGap)$)
     rectangle +(\bandWidth,\bandHeight)
     node[black,pos=.5] { Conduction Band };
@@ -81,10 +80,10 @@
   \draw[spin,<-] ($(a2)+(2*\levelwidth/3,-0.5*\arrowHeight)$) -- +(0,\arrowHeight);
   \draw[spin] ($(e1)+(0.5*\levelwidth,-0.5*\arrowHeight)$) -- +(0,\arrowHeight);
   \draw[spin] ($(e2)+(0.5*\levelwidth,-0.5*\arrowHeight)$) -- +(0,\arrowHeight);
-
-
-  \node[] at ($(Origin)+(0.5*\bandWidth,1.3*\bandHeight)$)
+  \node[] at ($(Origin)+(1*\bandWidth,1.3*\bandHeight)$)
     {\huge $ ^3A_2 $ };
+
+
 
 
  % 1}}} %
@@ -94,17 +93,16 @@
 
   \coordinate (Origin) at (0, 20);
   \coordinate (a1) at
-    ($(Origin)+(\bandWidth/2-\levelwidth/2 ,\bandHeight+\levelSeparation )$);
+    ($(Origin)+(\bandWidth/2-\levelwidth/2 ,0.5*\bandHeight )$);
   \coordinate (a2) at
-    ($(Origin)+(\bandWidth/2-\levelwidth/2 ,\bandHeight+2*\levelSeparation )$);
+    ($(Origin)+(\bandWidth/2-\levelwidth/2 ,\bandHeight+1*\levelSeparation )$);
   \coordinate (e1) at
-    ($(Origin)+(\bandWidth/3-2*\levelwidth/3 ,\bandHeight+3*\levelSeparation )$);
+    ($(Origin)+(\bandWidth/3-2*\levelwidth/3 ,\bandHeight+2*\levelSeparation )$);
   \coordinate (e2) at
     ($(e1)+(\bandWidth/3+1*\levelwidth/3 ,0)$);
 
   \fill [orange] (Origin)
-    rectangle +(\bandWidth,\bandHeight)
-    node[black,pos=.5] { Valence Band };
+    rectangle +(\bandWidth,\bandHeight);
   \fill [orange] ($(Origin)+(0,\bandHeight+\bandGap)$)
     rectangle +(\bandWidth,\bandHeight)
     node[black,pos=.5] { Conduction Band };
@@ -130,7 +128,7 @@
   \draw[spin] ($(e2)+(0.5*\levelwidth,-0.5*\arrowHeight)$) -- +(0,\arrowHeight);
 
 
-  \node[] at ($(Origin)+(0.5*\bandWidth,1.3*\bandHeight)$)
+  \node[] at ($(Origin)+(1*\bandWidth,1.3*\bandHeight)$)
     {\huge $ ^3E $ };
 
 

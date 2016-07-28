@@ -37,8 +37,8 @@
     %  Spin spin {{{1  %
     %%%%%%%%%%%%%%%%%%%%
 
-    \draw[](8,\headerheight)node[font=\large]{
-      $ \hat{ \mathbf{S}}^{t} \mathsf{D} \hat{ \mathbf{S}} $ 
+    \draw[](6.5,\headerheight-1)node[font=\large]{
+        ($ \hat{ \mathbf{S}}^{t} \mathsf{D} \hat{ \mathbf{S}} $)
     };
 % Draw the energy levels.
     \draw[level,ghost] ( 5, 6) -- ( 6, 7.5);
@@ -49,11 +49,12 @@
       node[midway,below]{ $ z\ (m_{s}=0) $ };
 
 
-    \draw[rotdis] (7,7.5) -- (7,6)
-      node[right=1em,midway]{$E$};
-    \draw[rotdis] (7,6) -- (7,0)
-      node[right=1em,midway]{$D$};
-    %\draw[blue] (10.,9)node{F};
+    %\draw[rotdis] (7,7.5) -- (7,6)
+      %node[right=1em,midway]{$E$};
+    %\draw[rotdis] (7,6) -- (7,0)
+      %node[right=1em,midway]{$\propto D$};
+    \draw[rotdis] (7,7.5) -- (7,0)
+      node[right=0em,midway]{$\propto D$};
 
 
     \draw[level,ghost] ( 10, 0) -- ( 13, 0);
@@ -70,9 +71,11 @@
     \draw[level] ( 13, 6.8) -- ( 17, 6.8)node[right]{$ y $ };
     \draw[level] ( 13, 0) -- ( 17, 0)
       node[midway,below]{ $ z\ (m_{s}=0) $ };
-    \draw[](15,\headerheight)node[font=\large]{\textbf{Zeeman/strain}};
 
+    \draw[rotdis] ( 13.5, 8.2) -- ( 13.5, 6.8) 
+      node[right=0em,midway]{$\propto E$};
 
+    \draw[](10,\headerheight)node[font=\large]{\textbf{Spin-Spin/Zeeman/strain}};
 
 
   \end{tikzpicture}
