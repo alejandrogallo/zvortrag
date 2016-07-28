@@ -1,7 +1,8 @@
 %   preamble {{{1  %
 %%%%%%%%%%%%%%%%%%%%
 
-\documentclass[notes=show]{beamer}
+%\documentclass[notes=show]{beamer}
+\documentclass[notes=hide]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
@@ -31,7 +32,7 @@
 \author{Alejandro Agustí Martínez-Soria Gallo}
 \institute{
   Max-Planck Institute for solid state research\\
-  \textbf{Advisor}: Dr. Andreas G\"uneis
+  \textbf{Advisor}: Prof. Dr. Andreas G\"uneis
 }
 
 
@@ -79,33 +80,33 @@
 
 \section{Aim and scope of the work} %{{{1
 \begin{frame}{Aims and motivation}
-  \begin{itemize}
-
-    \item
-      Exploration of defect centres using state-of-the-art ab-initio
-      theories.
-
-    \item
-      Benchmark ab initio theories with well-known
-      experimental data.
-
-    \item
-      Systematic characterisation of defect fingerprints: ZFS, ZPL.
-
-    \item
-      Search for new defects with tailored properties.
-
-
-  \end{itemize}
 
   \begin{columns}
     \begin{column}{0.5\textwidth}
-  \begin{center}
-    \includegraphics[width=1\textwidth]{images/POSCAR_16_view.png}
-  \end{center}
+      \begin{itemize}
+
+        \item
+          Exploration of defect centres using state-of-the-art ab-initio
+          theories.
+
+        \item
+          Benchmark ab initio theories with well-known
+          experimental data.
+
+        \item
+          Systematic characterisation of defect fingerprints: ZFS, ZPL.
+
+        \item
+          Search for new defects with tailored properties which are useful
+          for different applications.
+
+
+      \end{itemize}
     \end{column}
     \begin{column}{0.5\textwidth}
-
+      \begin{center}
+        \includegraphics[width=1\textwidth]{images/POSCAR_16_view.png}
+      \end{center}
     \end{column}
   \end{columns}
 
@@ -154,27 +155,44 @@
 
 \end{frame}
 
-\begin{frame}{Main level overview: $ \mathsf{NV}^{-} $ }
-  \begin{center}
-    \includegraphics[width=0.9\textwidth]{images/basic_levels.pdf}
+%\begin{frame}{Nitrogen Vacancy Center (Model)}
+  %\begin{center}
+    %\includegraphics[width=0.9\textwidth]{images/folien_vac.png}
+  %\end{center}
+%\end{frame}
+
+\begin{frame}{Nitrogen Vacancy Center (Dangling bonds)}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+\begin{center}
+    \includegraphics[width=0.9\textwidth]{images/folien_dangling.png}
   \end{center}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+        \item Model for the defect 4 $ sp^{3} $ dangling bonds $ \left \{ \sigma _{1}, \ldots, \sigma _{4} \right \} $
+        \item Linear Combination of Atomic Orbitals (LCAO) to
+          account for $ C_{3v} $ symmetry.
+        \item In the case of $ \mathsf{NV}^{-} $ we have
+          $ 1 \# \mathsf{C} + 2\times \# \mathsf{N} + 1 \mathsf{e} = 6 $ electrons.
+        \item From $ \sigma _{i} $ we obtain 4 levels $ a_1(1), a_1(2), e(1), e(2) $ classified according to their symmetry.
 
-  \note{
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  
+\end{frame}
 
-    To explain fluorescence experiments it is essential to have a picture of
-    the electronic and vibronic states of a defected diamond sample.
-    Theoretical models using a \textit{Linear combination of atomic orbitals}
-    (LCAO) give rise to a good prediction of the Spin multiplicity and triplet
-    energy levels of the negative NV center.
+\begin{frame}{Basic level overview}
+  \begin{center}
+    \includegraphics[height=0.7\textheight]{images/basic_level_definition.pdf}
+  \end{center}
+\end{frame}
 
-    From the interplay of theory and experiments arises this electronic level
-    scheme. On the one hand we encounter two stable triplet levels, where one
-    of them is the ground state of the defect. Between them lie two metastable
-    singlet states, which will play an essential role for applications of the
-    defect levels.
-
-  }
-
+\begin{frame}{Basic level overview: Ground State}
+  \begin{center}
+    \includegraphics[height=0.7\textheight]{images/basic_level_definition_with_spin.pdf}
+  \end{center}
 \end{frame}
 
 \begin{frame}{Triplets overview: $ \mathsf{NV}^{-} $ }
@@ -209,6 +227,30 @@
   }
 
 \end{frame}
+
+\begin{frame}{Main level overview: $ \mathsf{NV}^{-} $ }
+  \begin{center}
+    \includegraphics[width=0.9\textwidth]{images/basic_levels.pdf}
+  \end{center}
+
+  \note{
+
+    To explain fluorescence experiments it is essential to have a picture of
+    the electronic and vibronic states of a defected diamond sample.
+    Theoretical models using a \textit{Linear combination of atomic orbitals}
+    (LCAO) give rise to a good prediction of the Spin multiplicity and triplet
+    energy levels of the negative NV center.
+
+    From the interplay of theory and experiments arises this electronic level
+    scheme. On the one hand we encounter two stable triplet levels, where one
+    of them is the ground state of the defect. Between them lie two metastable
+    singlet states, which will play an essential role for applications of the
+    defect levels.
+
+  }
+
+\end{frame}
+
 
 \begin{frame}{Zero Field Splitting (ZFS)}
   \begin{center}
@@ -265,6 +307,22 @@
 
 \end{frame}
 
+\begin{frame}{Transitions overview: $ \mathsf{NV}^{-} $ }
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+  \begin{center}
+    \includegraphics[width=1.0\textwidth]{images/NV_minus_transitions_qubit.pdf}
+  \end{center}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+        \item Detection of spin state.
+        \item Realization of a \textit{qubit}.
+        \item Initialization of the state.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
 
 \begin{frame}{Zero phonon line (ZPL)}
   \begin{columns}
@@ -389,21 +447,6 @@
   \end{center}
 \end{frame}
 
-\begin{frame}{ $ \mathsf{NV}^{-} $: Excited state $ ^3E $ }
-  \begin{center}
-    \begin{columns}
-      \begin{column}{0.3\textwidth}
-        \includegraphics[height=1\textheight]{images/lumos/excited/N_minus_cubic_128_B_OUTCAR.pdf}
-      \end{column}
-      \begin{column}{0.3\textwidth}
-        \includegraphics[height=1\textheight]{images/lumos/excited/N_minus_hexagonal_z_128_B_OUTCAR.pdf}
-      \end{column}
-      \begin{column}{0.3\textwidth}
-        \includegraphics[height=1\textheight]{images/lumos/excited/N_minus_hexagonal_x_128_B_OUTCAR.pdf}
-      \end{column}
-    \end{columns}
-  \end{center}
-\end{frame}
 
 \begin{frame}{$ \mathsf{NV}^{-} $: ZFS }
   \begin{itemize}
@@ -417,6 +460,21 @@
   \includegraphics[width=1.0\textwidth, trim=0 0 0em 0,clip]{images/splitting_comparison/dmatrix_encut/N_all.pdf}
 \end{frame}
 
+%\begin{frame}{ $ \mathsf{NV}^{-} $: Excited state $ ^3E $ }
+  %\begin{center}
+    %\begin{columns}
+      %\begin{column}{0.3\textwidth}
+        %\includegraphics[height=1\textheight]{images/lumos/excited/N_minus_cubic_128_B_OUTCAR.pdf}
+      %\end{column}
+      %\begin{column}{0.3\textwidth}
+        %\includegraphics[height=1\textheight]{images/lumos/excited/N_minus_hexagonal_z_128_B_OUTCAR.pdf}
+      %\end{column}
+      %\begin{column}{0.3\textwidth}
+        %\includegraphics[height=1\textheight]{images/lumos/excited/N_minus_hexagonal_x_128_B_OUTCAR.pdf}
+      %\end{column}
+    %\end{columns}
+  %\end{center}
+%\end{frame}
 
 
 
@@ -425,81 +483,81 @@
 
 
 
-\begin{frame}{ $ \mathsf{NV}^{-} $: Vibronic scheme (PBE + 128 atomic cell)}
 
-  \begin{center}
-    \includegraphics<1>[width=.5\textwidth]{images/vibronic.pdf}
-  \end{center}
 
-  \only<2>{
-    \begin{columns}
-      \begin{column}{0.3333\textwidth}
-        \centering
-        \textit{Cubic }
-        \includegraphics[width=1\textwidth, trim=0 0 0em 0,clip]{images/abcd/abcd_128_zinc.pdf}
-      \end{column}
-      \begin{column}{0.3333\textwidth}
-        \centering
-        \textit{Hexagonal $ x $ }
-        \includegraphics[width=1\textwidth, trim=0 0 0em 0,clip]{images/abcd/abcd_128_z.pdf}
-      \end{column}
-      \begin{column}{0.3333\textwidth}
-        \centering
-        \textit{Hexagonal $ z $ }
-        \includegraphics[width=1\textwidth, trim=0 0 0em 0,clip]{images/abcd/abcd_128_x.pdf}
-      \end{column}
-    \end{columns}
-  }
-  \only<3->{
-    \begin{columns}
-      \begin{column}{0.3333\textwidth}
-        \centering
-        \textit{Cubic }
-        \includegraphics[width=1\textwidth, trim=0 0 0em 0,clip]{images/abcd/abcd_128_zinc.pdf}
-      \end{column}
-      \begin{column}{0.3333\textwidth}
-        \begin{center}
-          \small
-          \begin{tabular}{lc}
-            \hline
-            \multicolumn{2}{c}{Experimental data}\\
-            \hline
-            ZPL & 1.945\\
-            \hline
-            $ ^3A_2 \to ^3E^{*} $  & 2.180\\
-            \hline
-            $ S $  & 0.235\\
-            \hline
-            $  ^3E \to ^3A_2^{*} $ & 1.760\\
-            \hline
-            $ AS $  & 0.185\\
-            \hline
-          \end{tabular}
-        \end{center}
-      \end{column}
-      \begin{column}{0.3333\textwidth}
-        \begin{center}
-          \small
-          \begin{tabular}{lc}
-            \hline
-            \multicolumn{2}{c}{Calculations}\\
-            \hline
-            ZPL & 1.693\\
-            \hline
-            $ ^3A_2 \to ^3E^{*} $  & 1.842\\
-            \hline
-            $ S $  & 0.150\\
-            \hline
-            $  ^3E \to ^3A_2^{*} $  & 1.549\\
-            \hline
-            $ AS $  & 0.144\\
-            \hline
-          \end{tabular}
-        \end{center}
-      \end{column}
-    \end{columns}
-    }
-  \end{frame}
+%\begin{frame}{ $ \mathsf{NV}^{-} $: Vibronic scheme (PBE + 128 atomic cell)}
+  %\begin{center}
+    %\includegraphics<1>[width=.5\textwidth]{images/vibronic.pdf}
+  %\end{center}
+  %\only<2>{
+    %\begin{columns}
+      %\begin{column}{0.3333\textwidth}
+        %\centering
+        %\textit{Cubic }
+        %\includegraphics[width=1\textwidth, trim=0 0 0em 0,clip]{images/abcd/abcd_128_zinc.pdf}
+      %\end{column}
+      %\begin{column}{0.3333\textwidth}
+        %\centering
+        %\textit{Hexagonal $ x $ }
+        %\includegraphics[width=1\textwidth, trim=0 0 0em 0,clip]{images/abcd/abcd_128_z.pdf}
+      %\end{column}
+      %\begin{column}{0.3333\textwidth}
+        %\centering
+        %\textit{Hexagonal $ z $ }
+        %\includegraphics[width=1\textwidth, trim=0 0 0em 0,clip]{images/abcd/abcd_128_x.pdf}
+      %\end{column}
+    %\end{columns}
+  %}
+  %\only<3->{
+    %\begin{columns}
+      %\begin{column}{0.3333\textwidth}
+        %\centering
+        %\textit{Cubic }
+        %\includegraphics[width=1\textwidth, trim=0 0 0em 0,clip]{images/abcd/abcd_128_zinc.pdf}
+      %\end{column}
+      %\begin{column}{0.3333\textwidth}
+        %\begin{center}
+          %\small
+          %\begin{tabular}{lc}
+            %\hline
+            %\multicolumn{2}{c}{Experimental data}\\
+            %\hline
+            %ZPL & 1.945\\
+            %\hline
+            %$ ^3A_2 \to ^3E^{*} $  & 2.180\\
+            %\hline
+            %$ S $  & 0.235\\
+            %\hline
+            %$  ^3E \to ^3A_2^{*} $ & 1.760\\
+            %\hline
+            %$ AS $  & 0.185\\
+            %\hline
+          %\end{tabular}
+        %\end{center}
+      %\end{column}
+      %\begin{column}{0.3333\textwidth}
+        %\begin{center}
+          %\small
+          %\begin{tabular}{lc}
+            %\hline
+            %\multicolumn{2}{c}{Calculations}\\
+            %\hline
+            %ZPL & 1.693\\
+            %\hline
+            %$ ^3A_2 \to ^3E^{*} $  & 1.842\\
+            %\hline
+            %$ S $  & 0.150\\
+            %\hline
+            %$  ^3E \to ^3A_2^{*} $  & 1.549\\
+            %\hline
+            %$ AS $  & 0.144\\
+            %\hline
+          %\end{tabular}
+        %\end{center}
+      %\end{column}
+    %\end{columns}
+    %}
+  %\end{frame}
 
 \begin{frame}{Expanding the defect}
   \begin{center}
@@ -521,21 +579,21 @@
 
 
   
-\begin{frame}{Ground state example: $ \mathsf{GeV}^{-} $ }
-  \begin{center}
-    \begin{columns}
-      \begin{column}{0.3\textwidth}
-        \includegraphics[height=1\textheight]{images/lumos/Ge_minus_cubic_128_dmatrix_encut_lumos.pdf}
-      \end{column}
-      \begin{column}{0.3\textwidth}
-        \includegraphics[height=1\textheight]{images/lumos/Ge_minus_hexagonal_z_128_dmatrix_encut_lumos.pdf}
-      \end{column}
-      \begin{column}{0.3\textwidth}
-        \includegraphics[height=1\textheight]{images/lumos/Ge_minus_hexagonal_x_128_dmatrix_encut_lumos.pdf}
-      \end{column}
-    \end{columns}
-  \end{center}
-\end{frame}
+%\begin{frame}{Ground state example: $ \mathsf{GeV}^{-} $ }
+  %\begin{center}
+    %\begin{columns}
+      %\begin{column}{0.3\textwidth}
+        %\includegraphics[height=1\textheight]{images/lumos/Ge_minus_cubic_128_dmatrix_encut_lumos.pdf}
+      %\end{column}
+      %\begin{column}{0.3\textwidth}
+        %\includegraphics[height=1\textheight]{images/lumos/Ge_minus_hexagonal_z_128_dmatrix_encut_lumos.pdf}
+      %\end{column}
+      %\begin{column}{0.3\textwidth}
+        %\includegraphics[height=1\textheight]{images/lumos/Ge_minus_hexagonal_x_128_dmatrix_encut_lumos.pdf}
+      %\end{column}
+    %\end{columns}
+  %\end{center}
+%\end{frame}
 
 
 
@@ -555,22 +613,22 @@
 \end{frame}
 
 
-\begin{frame}{Using DMRG for excited state calculations}
-  \begin{columns}
-    \begin{column}{0.5\textwidth}
-      \begin{itemize}
-        \item $ \mathsf{XV}^{q} $ as molecules.
-        \item Localized states as isolated.
-        \item Issues like charge transfer, charge corrections.
-      \end{itemize}
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \centering
-      \textit{ $ \mathsf{NV}^{+} $ }
-      \includegraphics[clip, trim=2cm 0 2cm 0, width=1.0\textwidth]{images/nv_plus_orbitals_example.png}
-    \end{column}
-  \end{columns}
-\end{frame}
+%\begin{frame}{Using DMRG for excited state calculations}
+  %\begin{columns}
+    %\begin{column}{0.5\textwidth}
+      %\begin{itemize}
+        %\item $ \mathsf{XV}^{q} $ as molecules.
+        %\item Localized states as isolated.
+        %\item Issues like charge transfer, charge corrections.
+      %\end{itemize}
+    %\end{column}
+    %\begin{column}{0.5\textwidth}
+      %\centering
+      %\textit{ $ \mathsf{NV}^{+} $ }
+      %\includegraphics[clip, trim=2cm 0 2cm 0, width=1.0\textwidth]{images/nv_plus_orbitals_example.png}
+    %\end{column}
+  %\end{columns}
+%\end{frame}
 
 
 \plain{Thank you!}

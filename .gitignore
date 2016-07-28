@@ -3,6 +3,11 @@
 images/*pdf
 images/**/*pdf
 
+
+
+
+etc/Folien.pptx
+
 #Vim swap files
 *.swp
 

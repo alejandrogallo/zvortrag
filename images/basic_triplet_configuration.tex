@@ -33,23 +33,25 @@
   %%%%%%%%%%%%%%%%%%
   
 
-  \pgfmathsetmacro{\bandGap}{5.5}
+  \pgfmathsetmacro{\bandGap}{7.5}
   \pgfmathsetmacro{\bandHeight}{2}
-  \pgfmathsetmacro{\bandWidth}{7}
+  \pgfmathsetmacro{\bandWidth}{9}
   \pgfmathsetmacro{\levelwidth}{\bandWidth/2.5}
   \pgfmathsetmacro{\levelSeparation}{2}
   \pgfmathsetmacro{\arrowHeight}{1.3}
 
-  
+
   %  Level A2 {{{1  %
   %%%%%%%%%%%%%%%%%%%
-  
+
 
   \coordinate (Origin) at (0, 0);
-  \coordinate (a2) at
+  \coordinate (a1) at
     ($(Origin)+(\bandWidth/2-\levelwidth/2 ,\bandHeight+\levelSeparation )$);
+  \coordinate (a2) at
+    ($(Origin)+(\bandWidth/2-\levelwidth/2 ,\bandHeight+2*\levelSeparation )$);
   \coordinate (e1) at
-    ($(Origin)+(\bandWidth/3-2*\levelwidth/3 ,\bandHeight+2*\levelSeparation )$);
+    ($(Origin)+(\bandWidth/3-2*\levelwidth/3 ,\bandHeight+3*\levelSeparation )$);
   \coordinate (e2) at
     ($(e1)+(\bandWidth/3+1*\levelwidth/3 ,0)$);
 
@@ -60,16 +62,21 @@
     rectangle +(\bandWidth,\bandHeight)
     node[black,pos=.5] { Conduction Band };
 
+  \draw[level] (a1)
+    node[left=1pt] { $ a_1(1) $ }
+    -- +(\levelwidth,0);
   \draw[level] (a2)
-    node[left=1pt] { $ a_1 $ }
+    node[left=1pt] { $ a_1(2) $ }
     -- +(\levelwidth,0);
   \draw[level] (e1) 
-    node[left=1pt] { $ e $ }
+    node[left=1pt] { $ e(1) $ }
     -- +(\levelwidth,0);
   \draw[level] (e2) -- +(\levelwidth,0)
-    node[right=1pt] { $ e $ };
+    node[right=1pt] { $ e(2) $ };
 
 
+  \draw[spin] ($(a1)+(\levelwidth/3,-0.5*\arrowHeight)$) -- +(0,\arrowHeight);
+  \draw[spin,<-] ($(a1)+(2*\levelwidth/3,-0.5*\arrowHeight)$) -- +(0,\arrowHeight);
   \draw[spin] ($(a2)+(\levelwidth/3,-0.5*\arrowHeight)$) -- +(0,\arrowHeight);
   \draw[spin,<-] ($(a2)+(2*\levelwidth/3,-0.5*\arrowHeight)$) -- +(0,\arrowHeight);
   \draw[spin] ($(e1)+(0.5*\levelwidth,-0.5*\arrowHeight)$) -- +(0,\arrowHeight);
@@ -85,11 +92,13 @@
   %%%%%%%%%%%%%%%%%%%
   
 
-  \coordinate (Origin) at (0, 15);
-  \coordinate (a2) at
+  \coordinate (Origin) at (0, 20);
+  \coordinate (a1) at
     ($(Origin)+(\bandWidth/2-\levelwidth/2 ,\bandHeight+\levelSeparation )$);
+  \coordinate (a2) at
+    ($(Origin)+(\bandWidth/2-\levelwidth/2 ,\bandHeight+2*\levelSeparation )$);
   \coordinate (e1) at
-    ($(Origin)+(\bandWidth/3-2*\levelwidth/3 ,\bandHeight+2*\levelSeparation )$);
+    ($(Origin)+(\bandWidth/3-2*\levelwidth/3 ,\bandHeight+3*\levelSeparation )$);
   \coordinate (e2) at
     ($(e1)+(\bandWidth/3+1*\levelwidth/3 ,0)$);
 
@@ -100,16 +109,21 @@
     rectangle +(\bandWidth,\bandHeight)
     node[black,pos=.5] { Conduction Band };
 
+  \draw[level] (a1)
+    node[left=1pt] { $ a_1(1) $ }
+    -- +(\levelwidth,0);
   \draw[level] (a2)
-    node[left=1pt] { $ a_1 $ }
+    node[left=1pt] { $ a_1(2) $ }
     -- +(\levelwidth,0);
   \draw[level] (e1) 
-    node[left=1pt] { $ e $ }
+    node[left=1pt] { $ e(1) $ }
     -- +(\levelwidth,0);
   \draw[level] (e2) -- +(\levelwidth,0)
-    node[right=1pt] { $ e $ };
+    node[right=1pt] { $ e(2) $ };
 
 
+  \draw[spin] ($(a1)+(\levelwidth/3,-0.5*\arrowHeight)$) -- +(0,\arrowHeight);
+  \draw[spin,<-] ($(a1)+(2*\levelwidth/3,-0.5*\arrowHeight)$) -- +(0,\arrowHeight);
   \draw[spin] ($(e1)+(\levelwidth/3,-0.5*\arrowHeight)$) -- +(0,\arrowHeight);
   \draw[spin,<-] ($(e1)+(2*\levelwidth/3,-0.5*\arrowHeight)$) -- +(0,\arrowHeight);
   \draw[spin] ($(a2)+(0.5*\levelwidth,-0.5*\arrowHeight)$) -- +(0,\arrowHeight);
