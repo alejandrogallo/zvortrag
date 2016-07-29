@@ -29,9 +29,15 @@
 
     %  Main level {{{1  %
     %%%%%%%%%%%%%%%%%%%%%
-    \draw[level] (3, 6) -- (5, 6)node at (3,6)[left]{$^{3}A_{2}$};
+    \coordinate (A2) at (3, 4);
+    \coordinate (A2END) at ($(A2)+(2,0)$);
+    \draw[level] (A2)
+     node[left]{$^{3}A_{2}$}
+     -- (A2END);
     %main level ghost
-    \draw[gray,ghost](5,6)--(17,6);
+    \draw[gray,ghost](A2END)--+(12,0);
+    \draw[level,ghost] (A2END) -- ( 6, 7.5);
+    \draw[level,ghost] (A2END) -- ( 6, 0);
 
 
     %  Spin spin {{{1  %
@@ -41,8 +47,6 @@
         ($ \hat{ \mathbf{S}}^{t} \mathsf{D} \hat{ \mathbf{S}} $)
     };
 % Draw the energy levels.
-    \draw[level,ghost] ( 5, 6) -- ( 6, 7.5);
-    \draw[level,ghost] ( 5, 6) -- ( 6, 0);
     \draw[level] ( 6, 7.5) -- ( 10, 7.5)
       node[midway,above]{ $ x,y $ };
     \draw[level] ( 6, 0) -- ( 10, 0)
