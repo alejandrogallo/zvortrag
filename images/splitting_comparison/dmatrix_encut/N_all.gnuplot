@@ -34,7 +34,6 @@ set ytics add (2.88)
 set xtics add (0.0/1000)
 set ytics add (3046.1565/1000)
 
-#set label "Exp" at center
 set label "Experimental value for NV^-" at -0.15,2.89 center textcolor rgb "blue"
 
 
