@@ -48,14 +48,20 @@
 
 
 
-FIGS_DIR=images
-PDF_VIEWER=mupdf
+# PARAMETERS, OVERRIDE THESE
+SOURCE_DOCUMENT = main.tex
+BIBTEX_FILE     = main.bib
+FIGS_DIR        = images
+PDF_VIEWER      = mupdf
+PDFLATEX        = pdflatex
+BIBTEX          = bibtex
+
+BUILD_DOCUMENT = $(patsubst %.tex,%.pdf,$(SOURCE_DOCUMENT))
+
+BIBITEM_FILE=$(patsubst %.bib,%.bbl,$(BIBTEX_FILE))
 
 # for libs and such
 IGNORE_FIGS = $(FIGS_DIR)/atoms.asy $(FIGS_DIR)/resources.asy
-
-SOURCE_DOCUMENT = main.tex
-BUILD_DOCUMENT = $(patsubst %.tex,%.pdf,$(SOURCE_DOCUMENT))
 
 ASY_FILES         = $(filter-out $(IGNORE_FIGS),$(shell find $(FIGS_DIR) | grep .asy))
 ASY_PDF_FILES     = $(patsubst %.asy,%.pdf,$(ASY_FILES))
@@ -66,21 +72,26 @@ GNUPLOT_PDF_FILES = $(patsubst %.gnuplot,%.pdf,$(GNUPLOT_FILES))
 TEX_FILES         = $(filter-out $(IGNORE_FIGS),$(shell find $(FIGS_DIR) | grep .tex))
 TEX_PDF_FILES     = $(patsubst %.tex,%.pdf,$(TEX_FILES))
 
-
 FIGS=$(TEX_PDF_FILES) $(ASY_PDF_FILES) $(GNUPLOT_PDF_FILES)
 
-.PHONY: view-pdf
+.PHONY: view-pdf $(PDF_VIEWER)
 
 
 all: $(BUILD_DOCUMENT) view-pdf
 
-$(BUILD_DOCUMENT): $(SOURCE_DOCUMENT) $(FIGS) 
-	@echo Creating $(BUILD_DOCUMENT)
-	pdflatex $<
+bibliography: $(BIBITEM_FILE)
 
+$(BIBITEM_FILE): $(BIBTEX_FILE)
+	@echo "Compiling the bibliography"
+	-$(BIBTEX) $(patsubst %.bib,%,$(BIBTEX_FILE))
+
+$(BUILD_DOCUMENT): $(SOURCE_DOCUMENT) $(FIGS) $(BIBITEM_FILE)
+	@echo Creating $(BUILD_DOCUMENT)
+	$(PDFLATEX) $<
 
 #Open a viewer if there is none open viewing $(BUILD_DOCUMENT)
-view-pdf:
+view-pdf: $(PDF_VIEWER)
+mupdf:
 	-@ps aux | grep -v grep \
 	| grep "$(PDF_VIEWER)" \
 	| grep -q "$(BUILD_DOCUMENT)" \
@@ -90,9 +101,22 @@ view-pdf:
 	| grep "$(BUILD_DOCUMENT)" \
 	| awk '{print $$2}'\
 	| xargs -n1 kill -s SIGHUP
+evince:
+	-@ps aux | grep -v grep \
+	| grep "$(PDF_VIEWER)" \
+	| grep -q "$(BUILD_DOCUMENT)" \
+	||  $(PDF_VIEWER) "$(BUILD_DOCUMENT)" &
 
 clean:
-	latexmk -c
+	-rm *.aux
+	-rm *.bbl
+	-rm *.blg
+	-rm *.fdb_latexmk
+	-rm *.fls
+	-rm *.log
+	-rm *.out
+	-rm *.pdf
+	-rm *.toc
 
 %.pdf: %.asy
 	@echo Compiling $<
@@ -104,7 +128,7 @@ clean:
 
 %.pdf: %.tex
 	@echo Compiling $<
-	pdflatex --output-directory $(shell dirname $< ) $<
+	$(PDFLATEX) --output-directory $(shell dirname $< ) $<
 
 js:
 	pandoc --mathjax -s -f latex -t revealjs main.tex
