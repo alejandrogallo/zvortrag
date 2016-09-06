@@ -107,6 +107,11 @@ mupdf: ## Refresh mupdf
 	| grep "$(BUILD_DOCUMENT)" \
 	| awk '{print $$2}'\
 	| xargs -n1 kill -s SIGHUP
+evince:
+	-@ps aux | grep -v grep \
+	| grep "$(PDF_VIEWER)" \
+	| grep -q "$(BUILD_DOCUMENT)" \
+	||  $(PDF_VIEWER) "$(BUILD_DOCUMENT)" &
 
 %.pdf: %.asy
 	@echo Compiling $<
