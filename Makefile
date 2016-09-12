@@ -7,6 +7,8 @@ PDF_VIEWER      = mupdf
 LATEX           = pdflatex
 PDFLATEX        = pdflatex
 ASYMPTOTE       = asy
+SH              = bash
+PY              = python
 GNUPLOT         = gnuplot
 pandoc          = pandoc
 BIBTEX          = bibtex
@@ -14,6 +16,7 @@ BIBTEX          = bibtex
 WITH_PYTHONTEX  = 0
 PYTHONTEX       = pythontex
 DEPENDENCIES    =
+AUTO_FIG_DEPS   = 1
 
 
 PDF_DOCUMENT   = $(shell readlink -f $(patsubst %.tex,%.pdf,$(SOURCE_DOCUMENT)))
@@ -24,21 +27,22 @@ TOC_FILE       = $(patsubst %.tex,%.toc,$(SOURCE_DOCUMENT))
 BIBITEM_FILE   = $(patsubst %.bib,%.bbl,$(BIBTEX_FILE))
 PYTHONTEX_FILE = $(patsubst %.tex,%.pytxcode,$(SOURCE_DOCUMENT))
 BUILD_DOCUMENT = $(PDF_DOCUMENT)
+FIGS_SUFFIXES  = %.pdf %.eps %.png %.jpg %.jpeg %.gif %.dvi %.bmp %.svg %.ps
 
 
+ifneq ($(AUTO_FIG_DEPS),1)
 # for libs and such
-IGNORE_FIGS    = $(FIGS_DIR)/atoms.asy $(FIGS_DIR)/resources.asy
-
-ASY_FILES         = $(filter-out $(IGNORE_FIGS),$(shell find $(FIGS_DIR) | grep .asy))
-ASY_PDF_FILES     = $(patsubst %.asy,%.pdf,$(ASY_FILES))
-
-GNUPLOT_FILES     = $(filter-out $(IGNORE_FIGS),$(shell find $(FIGS_DIR) | grep .gnuplot))
-GNUPLOT_PDF_FILES = $(patsubst %.gnuplot,%.pdf,$(GNUPLOT_FILES))
-
-TEX_FILES         = $(filter-out $(IGNORE_FIGS),$(shell find $(FIGS_DIR) | grep .tex))
-TEX_PDF_FILES     = $(patsubst %.tex,%.pdf,$(TEX_FILES))
-
-FIGS=$(TEX_PDF_FILES) $(ASY_PDF_FILES) $(GNUPLOT_PDF_FILES)
+	IGNORE_FIGS       = $(FIGS_DIR)/atoms.asy $(FIGS_DIR)/resources.asy
+	ASY_FILES         = $(filter-out $(IGNORE_FIGS),$(shell find $(FIGS_DIR) | grep .asy))
+	ASY_PDF_FILES     = $(patsubst %.asy,%.pdf,$(ASY_FILES))
+	GNUPLOT_FILES     = $(filter-out $(IGNORE_FIGS),$(shell find $(FIGS_DIR) | grep .gnuplot))
+	GNUPLOT_PDF_FILES = $(patsubst %.gnuplot,%.pdf,$(GNUPLOT_FILES))
+	TEX_FILES         = $(filter-out $(IGNORE_FIGS),$(shell find $(FIGS_DIR) | grep .tex))
+	TEX_PDF_FILES     = $(patsubst %.tex,%.pdf,$(TEX_FILES))
+	FIGS=$(TEX_PDF_FILES) $(ASY_PDF_FILES) $(GNUPLOT_PDF_FILES)
+else
+	include deps/figures.d
+endif
 
 .PHONY: view-pdf open-pdf $(PDF_VIEWER) todo help test force
 
@@ -93,19 +97,34 @@ mupdf: ## Refresh mupdf
 	| awk '{print $$2}'\
 	| xargs -n1 kill -s SIGHUP
 
-%.pdf: %.asy
+$(FIGS_SUFFIXES): %.asy
 	@echo Compiling $<
-	cd $(dir $<) && $(ASYMPTOTE) -f pdf $(notdir $< )
+	cd $(dir $<) && $(ASYMPTOTE) -f $(shell echo $(suffix $@) | tr -d "\.") $(notdir $< )
 
-%.pdf: %.gnuplot
+$(FIGS_SUFFIXES): %.gnuplot
 	@echo Compiling $<
 	cd $(dir $< ) && $(GNUPLOT) $(notdir $< )
 
-%.pdf %.toc: %.tex
+$(FIGS_SUFFIXES): %.sh
+	@echo Running $< to create $@
+	cd $(dir $< ) && $(SH) $(notdir $< )
+
+$(FIGS_SUFFIXES): %.py
+	@echo Running $< to create $@
+	cd $(dir $< ) && $(PY) $(notdir $< )
+
+$(FIGS_SUFFIXES) %.toc: %.tex
 	@echo Creating $@ from $<
 	$(PDFLATEX) --output-directory $(dir $< ) $<
 
+deps/figures.d: $(SOURCE_DOCUMENT)
+	@echo Hello World
+	mkdir -p $(dir $@)
+	@echo FIGS = \\ > $@
+	grep '\includegraphic.' $<  | sed 's/.*{\(.*\)}.*/\1 \\/' >> $@
+
 clean: ## Remove build and temporary files
+	-@rm -rf deps
 	-@rm *.aux
 	-@rm *.bbl
 	-@rm *.blg
@@ -127,7 +146,7 @@ clean: ## Remove build and temporary files
 	-@rm $(patsubst %.tex,%.log,$(TEX_FILES)) 2> /dev/null
 	-@rm $(patsubst %.tex,%.out,$(TEX_FILES)) 2> /dev/null
 	-@rm $(patsubst %.tex,%.toc,$(TEX_FILES)) 2> /dev/null
-	-@rm $(FIGS) 2> /dev/null
+	#-@rm $(FIGS) 2> /dev/null
 	-@rm $(PYTHONTEX_FILE)
 	-@rm -rf pythontex-files-main/
 
