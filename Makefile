@@ -77,15 +77,13 @@ $(BIBITEM_FILE): $(BIBTEX_FILE)
 	$(PYTHONTEX) $<
 
 #Open a viewer if there is none open viewing $(BUILD_DOCUMENT)
-view-pdf: $(PDF_VIEWER)
+view-pdf: $(PDF_VIEWER) open-pdf ## Refresh and open pdf
 
 open-pdf: ## Open pdf build document
 	-@ps aux | grep -v grep \
 	| grep "$(PDF_VIEWER)" \
 	| grep -q "$(BUILD_DOCUMENT)" \
 	||  $(PDF_VIEWER) "$(BUILD_DOCUMENT)" &
-
-$(PDF_VIEWER): open-pdf
 
 mupdf: ## Refresh mupdf
 	-@ps aux \
