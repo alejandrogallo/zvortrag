@@ -1,68 +1,33 @@
-# make info {{{ #
-################################################################
-# $@  the name of the file to be made''
-# $?  the set of dependent names that are younger than the target
-# $<  the name of the related file that caused the action (the precursor to the target) - this is only for suffix rules
-# $*  the shared prefix of the target and dependent - only for suffix rules
-# $$  escapes macro substitution, returns a single $''.
-################################################################
-# }}} make info #
-#  pandoc info {{{ # 
-##################################################################
-#json                (JSON version of native AST),
-#plain               (plain text),
-#markdown            (pandoc's extended markdown), mark-
-#down_strict         (original  unextended  markdown),
-#markdown_phpextra   (PHP Markdown extra extended markdown),
-#markdown_github     (github extended  markdown),
-#rst                 (reStructuredText),
-#html                (XHTML 1),
-#html5               (HTML 5),
-#latex               (LaTeX),
-#beamer              (LaTeX beamer slide show),
-#context             (ConTeXt),
-#man                 (groff  man),
-#mediawiki           (MediaWiki markup),
-#textile             (Textile),
-#org                 (Emacs Org-Mode),
-#texinfo             (GNU Texinfo),
-#opml                (OPML),
-#docbook             (DocBook),
-#opendocument        (OpenDoc- ument),
-#odt                 (OpenOffice text document),
-#docx                (Word  docx),
-#rtf                 (rich  text  format),
-#epub                (EPUB v2 book),
-#epub3               (EPUB v3),
-#fb2                 (FictionBook2 e-book),
-#asciidoc            (AsciiDoc),
-#slidy               (Slidy  HTML and   javascript   slide  show),
-#slideous            (Slideous  HTML  and javascript slide show),
-#dzslides            (DZSlides  HTML5  +  javascript slide show),
-#revealjs            (reveal.js HTML5 + javascript slide show),
-#s5                  (S5 HTML and javascript slide show),
-##################################################################
-#  }}} pandoc info # 
-
-
 
 # PARAMETERS, OVERRIDE THESE
 SOURCE_DOCUMENT = main.tex
-BIBTEX_FILE     =
+BIBTEX_FILE     = main.bib
 FIGS_DIR        = images
 PDF_VIEWER      = mupdf
+LATEX           = pdflatex
 PDFLATEX        = pdflatex
+ASYMPTOTE       = asy
+GNUPLOT         = gnuplot
+pandoc          = pandoc
 BIBTEX          = bibtex
-PDF_DOCUMENT    = $(shell readlink -f $(patsubst %.tex,%.pdf,$(SOURCE_DOCUMENT)))
-MAN_DOCUMENT    = $(patsubst %.tex,%.1,$(SOURCE_DOCUMENT))
-HTML_DOCUMENT    = $(patsubst %.tex,%.html,$(SOURCE_DOCUMENT))
+# Do you use pythontex?
+WITH_PYTHONTEX  = 0
+PYTHONTEX       = pythontex
+DEPENDENCIES    =
 
+
+PDF_DOCUMENT   = $(shell readlink -f $(patsubst %.tex,%.pdf,$(SOURCE_DOCUMENT)))
+DVI_DOCUMENT   = $(shell readlink -f $(patsubst %.tex,%.dvi,$(SOURCE_DOCUMENT)))
+MAN_DOCUMENT   = $(patsubst %.tex,%.1,$(SOURCE_DOCUMENT))
+HTML_DOCUMENT  = $(patsubst %.tex,%.html,$(SOURCE_DOCUMENT))
+TOC_FILE       = $(patsubst %.tex,%.toc,$(SOURCE_DOCUMENT))
+BIBITEM_FILE   = $(patsubst %.bib,%.bbl,$(BIBTEX_FILE))
+PYTHONTEX_FILE = $(patsubst %.tex,%.pytxcode,$(SOURCE_DOCUMENT))
 BUILD_DOCUMENT = $(PDF_DOCUMENT)
 
-BIBITEM_FILE=$(patsubst %.bib,%.bbl,$(BIBTEX_FILE))
 
 # for libs and such
-IGNORE_FIGS = $(FIGS_DIR)/atoms.asy $(FIGS_DIR)/resources.asy
+IGNORE_FIGS    = $(FIGS_DIR)/atoms.asy $(FIGS_DIR)/resources.asy
 
 ASY_FILES         = $(filter-out $(IGNORE_FIGS),$(shell find $(FIGS_DIR) | grep .asy))
 ASY_PDF_FILES     = $(patsubst %.asy,%.pdf,$(ASY_FILES))
@@ -75,20 +40,41 @@ TEX_PDF_FILES     = $(patsubst %.tex,%.pdf,$(TEX_FILES))
 
 FIGS=$(TEX_PDF_FILES) $(ASY_PDF_FILES) $(GNUPLOT_PDF_FILES)
 
-.PHONY: view-pdf open-pdf $(PDF_VIEWER) todo
+.PHONY: view-pdf open-pdf $(PDF_VIEWER) todo help test force
+
+# Main dependencies for BUILD_DOCUMENT
+DEPENDENCIES += $(SOURCE_DOCUMENT) $(FIGS) $(TOC_FILE)
+
+# Bibtex dependency
+ifneq ("$(wildcard $(BIBTEX_FILE))","")
+	DEPENDENCIES += $(BIBITEM_FILE)
+endif
+
+# Pythontex support
+ifneq ($(WITH_PYTHONTEX),0)
+	DEPENDENCIES += $(PYTHONTEX_FILE)
+endif
 
 
-all: $(BUILD_DOCUMENT) view-pdf
+all: $(BUILD_DOCUMENT) view-pdf ## (Default) Create BUILD_DOCUMENT
 
-bibliography: $(BIBITEM_FILE)
+$(BUILD_DOCUMENT): $(DEPENDENCIES)
+
+force: ## Force creation of BUILD_DOCUMENT (for bibtex)
+	-rm $(BUILD_DOCUMENT)
+	$(MAKE) $(BUILD_DOCUMENT)
 
 $(BIBITEM_FILE): $(BIBTEX_FILE)
 	@echo "Compiling the bibliography"
 	-$(BIBTEX) $(patsubst %.bib,%,$(BIBTEX_FILE))
+	@echo Compiling again $(BUILD_DOCUMENT) to update refs
+	$(MAKE) force
 
-$(BUILD_DOCUMENT): $(SOURCE_DOCUMENT) $(FIGS) $(BIBITEM_FILE)
-	@echo Creating $(BUILD_DOCUMENT)
-	$(PDFLATEX) $<
+%.pytxcode: %.tex
+	@echo "Compiling latex for pythontex"
+	$(LATEX) $<
+	@echo "Creating pythontex"
+	$(PYTHONTEX) $<
 
 #Open a viewer if there is none open viewing $(BUILD_DOCUMENT)
 view-pdf: $(PDF_VIEWER)
@@ -102,50 +88,59 @@ open-pdf: ## Open pdf build document
 $(PDF_VIEWER): open-pdf
 
 mupdf: ## Refresh mupdf
-	-@ps aux | grep -v grep \
+	-@ps aux \
+	| grep -v grep \
 	| grep "$(PDF_VIEWER)" \
 	| grep "$(BUILD_DOCUMENT)" \
 	| awk '{print $$2}'\
 	| xargs -n1 kill -s SIGHUP
-evince:
-	-@ps aux | grep -v grep \
-	| grep "$(PDF_VIEWER)" \
-	| grep -q "$(BUILD_DOCUMENT)" \
-	||  $(PDF_VIEWER) "$(BUILD_DOCUMENT)" &
 
 %.pdf: %.asy
 	@echo Compiling $<
-	cd $(shell dirname $<) && asy -f pdf $(shell basename $< )
+	cd $(dir $<) && $(ASYMPTOTE) -f pdf $(notdir $< )
 
 %.pdf: %.gnuplot
 	@echo Compiling $<
-	cd $(shell dirname $< ) && gnuplot $(shell basename $< )
+	cd $(dir $< ) && $(GNUPLOT) $(notdir $< )
 
-%.pdf: %.tex
-	@echo Compiling $<
-	$(PDFLATEX) --output-directory $(shell dirname $< ) $<
+%.pdf %.toc: %.tex
+	@echo Creating $@ from $<
+	$(PDFLATEX) --output-directory $(dir $< ) $<
 
 clean: ## Remove build and temporary files
-	-rm *.aux
-	-rm *.bbl
-	-rm *.blg
-	-rm *.fdb_latexmk
-	-rm *.fls
-	-rm *.log
-	-rm *.out
-	-rm *.toc
-	-rm $(PDF_DOCUMENT)
-	-rm $(HTML_DOCUMENT)
-	-rm $(MAN_DOCUMENT)
+	-@rm *.aux
+	-@rm *.bbl
+	-@rm *.blg
+	-@rm *.fdb_latexmk
+	-@rm *.fls
+	-@rm *.log
+	-@rm *.out
+	-@rm *.toc
+	-@rm $(PDF_DOCUMENT)
+	-@rm $(DVI_DOCUMENT)
+	-@rm $(HTML_DOCUMENT)
+	-@rm $(MAN_DOCUMENT)
+	-@rm $(patsubst %.tex,%.pdf,$(TEX_FILES)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.aux,$(TEX_FILES)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.bbl,$(TEX_FILES)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.blg,$(TEX_FILES)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.fdb_latexmk,$(TEX_FILES)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.fls,$(TEX_FILES)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.log,$(TEX_FILES)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.out,$(TEX_FILES)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.toc,$(TEX_FILES)) 2> /dev/null
+	-@rm $(FIGS) 2> /dev/null
+	-@rm $(PYTHONTEX_FILE)
+	-@rm -rf pythontex-files-main/
 
 revealjs: $(SOURCE_DOCUMENT) ## Create a revealjs presentation
-	pandoc --mathjax -s -f latex -t revealjs $(SOURCE_DOCUMENT)
+	$(PANDOC) --mathjax -s -f latex -t revealjs $(SOURCE_DOCUMENT)
 
 man: $(SOURCE_DOCUMENT) ## Create a man document
-	pandoc -s -f latex -t man $(SOURCE_DOCUMENT) -o $(MAN_DOCUMENT)
+	$(PANDOC) -s -f latex -t man $(SOURCE_DOCUMENT) -o $(MAN_DOCUMENT)
 
 html: $(SOURCE_DOCUMENT) ## Create an html5 document
-	pandoc --mathjax -s -f latex -t html5 $(SOURCE_DOCUMENT) -o $(HTML_DOCUMENT)
+	$(PANDOC) --mathjax -s -f latex -t html5 $(SOURCE_DOCUMENT) -o $(HTML_DOCUMENT)
 
 todo: ## Print the todos from the main document
 	@sed -n "/\\TODO{/,/}/\
@@ -157,7 +152,9 @@ todo: ## Print the todos from the main document
 	}" $(SOURCE_DOCUMENT)
 
 test: ## See some make variables for debugging
-	-@echo $(FIGS)
+	@echo DEPENDENCIES
+	@echo ============
+	@echo $(DEPENDENCIES) | tr " " "\n"
 
 help: ## Prints help for targets with comments
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
