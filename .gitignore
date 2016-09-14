@@ -1,4 +1,4 @@
-
+deps
 *.pdf
 images/*pdf
 images/**/*pdf

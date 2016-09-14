@@ -1,8 +1,9 @@
 
 # PARAMETERS, OVERRIDE THESE
 SOURCE_DOCUMENT = main.tex
-BIBTEX_FILE     = main.bib
+BIBTEX_FILE     = $(patsubst %.tex,%.bib,$(SOURCE_DOCUMENT))
 FIGS_DIR        = images
+DEPS_DIR        = deps
 PDF_VIEWER      = mupdf
 LATEX           = pdflatex
 PDFLATEX        = pdflatex
@@ -12,11 +13,23 @@ PY              = python
 GNUPLOT         = gnuplot
 pandoc          = pandoc
 BIBTEX          = bibtex
+LOCAL_CONF      = config.mk
 # Do you use pythontex?
+DEPENDENCIES    =
+FIGS            =
+INCLUDES        =
+AUTO_FIG_DEPS   = 1
+AUTO_INC_DEPS   = 1
 WITH_PYTHONTEX  = 0
 PYTHONTEX       = pythontex
-DEPENDENCIES    =
-AUTO_FIG_DEPS   = 1
+ECHO            = @echo "\033[0;35m===>\033[0m"
+QUIET           = 0
+
+ifneq ($(QUIET),0)
+	FD_OUTPUT = 2>&1 > /dev/null
+else
+	FD_OUTPUT =
+endif
 
 
 PDF_DOCUMENT   = $(shell readlink -f $(patsubst %.tex,%.pdf,$(SOURCE_DOCUMENT)))
@@ -26,9 +39,20 @@ HTML_DOCUMENT  = $(patsubst %.tex,%.html,$(SOURCE_DOCUMENT))
 TOC_FILE       = $(patsubst %.tex,%.toc,$(SOURCE_DOCUMENT))
 BIBITEM_FILE   = $(patsubst %.bib,%.bbl,$(BIBTEX_FILE))
 PYTHONTEX_FILE = $(patsubst %.tex,%.pytxcode,$(SOURCE_DOCUMENT))
-BUILD_DOCUMENT = $(PDF_DOCUMENT)
 FIGS_SUFFIXES  = %.pdf %.eps %.png %.jpg %.jpeg %.gif %.dvi %.bmp %.svg %.ps
+PURGE_SUFFIXES = %.aux %.bbl %.blg %.fdb_latexmk %.fls %.log %.out %.ilg %.toc
+BUILD_DOCUMENT = $(PDF_DOCUMENT)
 
+# These files are to keep track of the dependencies for
+# latex or pdf includes, table of contents generation or
+# figure recognition
+TOC_DEP        = $(DEPS_DIR)/toc.d
+INCLUDES_DEP   = $(DEPS_DIR)/includes.d
+FIGS_DEP       = $(DEPS_DIR)/figs.d
+
+ifeq ($(AUTO_INC_DEPS),1)
+	include $(INCLUDES_DEP)
+endif 
 
 ifneq ($(AUTO_FIG_DEPS),1)
 # for libs and such
@@ -41,13 +65,13 @@ ifneq ($(AUTO_FIG_DEPS),1)
 	TEX_PDF_FILES     = $(patsubst %.tex,%.pdf,$(TEX_FILES))
 	FIGS=$(TEX_PDF_FILES) $(ASY_PDF_FILES) $(GNUPLOT_PDF_FILES)
 else
-	include deps/figures.d
+	include $(FIGS_DEP)
 endif
 
-.PHONY: view-pdf open-pdf $(PDF_VIEWER) todo help test force
+.PHONY: view-pdf open-pdf $(PDF_VIEWER) todo help test force purge
 
 # Main dependencies for BUILD_DOCUMENT
-DEPENDENCIES += $(SOURCE_DOCUMENT) $(FIGS) $(TOC_FILE)
+DEPENDENCIES += $(SOURCE_DOCUMENT) $(INCLUDES) $(FIGS) $(TOC_FILE)
 
 # Bibtex dependency
 ifneq ("$(wildcard $(BIBTEX_FILE))","")
@@ -69,15 +93,15 @@ force: ## Force creation of BUILD_DOCUMENT (for bibtex)
 	$(MAKE) $(BUILD_DOCUMENT)
 
 $(BIBITEM_FILE): $(BIBTEX_FILE)
-	@echo "Compiling the bibliography"
-	-$(BIBTEX) $(patsubst %.bib,%,$(BIBTEX_FILE))
-	@echo Compiling again $(BUILD_DOCUMENT) to update refs
+	$(ECHO) "Compiling the bibliography"
+	-$(BIBTEX) $(patsubst %.bib,%,$(BIBTEX_FILE)) $(FD_OUTPUT)
+	$(ECHO) Compiling again $(BUILD_DOCUMENT) to update refs
 	$(MAKE) force
 
 %.pytxcode: %.tex
-	@echo "Compiling latex for pythontex"
-	$(LATEX) $<
-	@echo "Creating pythontex"
+	$(ECHO) "Compiling latex for pythontex"
+	$(MAKE) force
+	$(ECHO) "Creating pythontex"
 	$(PYTHONTEX) $<
 
 #Open a viewer if there is none open viewing $(BUILD_DOCUMENT)
@@ -98,82 +122,113 @@ mupdf: ## Refresh mupdf
 	| xargs -n1 kill -s SIGHUP
 
 $(FIGS_SUFFIXES): %.asy
-	@echo Compiling $<
-	cd $(dir $<) && $(ASYMPTOTE) -f $(shell echo $(suffix $@) | tr -d "\.") $(notdir $< )
+	$(ECHO) Compiling $<
+	cd $(dir $<) && $(ASYMPTOTE) -f $(shell echo $(suffix $@) | tr -d "\.") $(notdir $< ) $(FD_OUTPUT)
 
 $(FIGS_SUFFIXES): %.gnuplot
-	@echo Compiling $<
-	cd $(dir $< ) && $(GNUPLOT) $(notdir $< )
+	$(ECHO) Compiling $<
+	cd $(dir $< ) && $(GNUPLOT) $(notdir $< ) $(FD_OUTPUT)
 
 $(FIGS_SUFFIXES): %.sh
-	@echo Running $< to create $@
-	cd $(dir $< ) && $(SH) $(notdir $< )
+	$(ECHO) Compiling $<
+	cd $(dir $< ) && $(SH) $(notdir $< ) $(FD_OUTPUT)
 
 $(FIGS_SUFFIXES): %.py
-	@echo Running $< to create $@
-	cd $(dir $< ) && $(PY) $(notdir $< )
+	$(ECHO) Compiling $<
+	cd $(dir $< ) && $(PY) $(notdir $< ) $(FD_OUTPUT)
 
-$(FIGS_SUFFIXES) %.toc: %.tex
-	@echo Creating $@ from $<
-	$(PDFLATEX) --output-directory $(dir $< ) $<
+$(FIGS_SUFFIXES): %.tex
+	$(ECHO) Compiling $<
+	cd $(dir $< ) && $(PDFLATEX) $(notdir $< ) $(FD_OUTPUT)
 
-deps/figures.d: $(SOURCE_DOCUMENT)
-	@echo Hello World
+$(TOC_FILE): $(TOC_DEP)
+	$(ECHO) Creating $(TOC_FILE)
+	cd $(dir $(SOURCE_DOCUMENT) ) && $(PDFLATEX) $(notdir $(SOURCE_DOCUMENT) ) $(FD_OUTPUT)
+
+$(TOC_DEP): $(SOURCE_DOCUMENT) $(INCLUDES_DEP)
+	$(ECHO) Parsing the toc entries
+	mkdir -p $(dir $@)
+	grep -E '\\(section|subsection|subsubsection|chapter|part|subsubsubsection).' $(SOURCE_DOCUMENT) $(INCLUDES)  \
+	| sed 's/.*{\(.*\)}.*/\1/' >> $@
+
+$(INCLUDES_DEP): $(SOURCE_DOCUMENT)
+	$(ECHO) Parsing the includes dependencies
+	mkdir -p $(dir $@)
+	@echo INCLUDES = \\ > $@
+	#@ Include statements should not have a .tex extension
+	#@ so we are forced to add it
+	grep -E '\\include[^gp]' $<  \
+	| sed 's/.*{\(.*\)}.*/\1.tex \\/' >> $@
+
+$(FIGS_DEP): $(SOURCE_DOCUMENT) $(INCLUDES_DEP)
+	$(ECHO) Parsing the graphics dependencies
 	mkdir -p $(dir $@)
 	@echo FIGS = \\ > $@
-	grep '\includegraphic.' $<  | sed 's/.*{\(.*\)}.*/\1 \\/' >> $@
+	grep -E '\\include(graphic|pdf).' $(SOURCE_DOCUMENT) $(INCLUDES)  \
+	| sed 's/.*{\(.*\)}.*/\1 \\/' >> $@
+
+#.PHONY: $(DEPS_DIR)/includes.d $(DEPS_DIR)/figures.d
+# vim-run: clear; make deps/includes.d ; make test
 
 clean: ## Remove build and temporary files
-	-@rm -rf deps
-	-@rm *.aux
-	-@rm *.bbl
-	-@rm *.blg
-	-@rm *.fdb_latexmk
-	-@rm *.fls
-	-@rm *.log
-	-@rm *.out
-	-@rm *.toc
+	$(ECHO) Cleaning up...
+	-@rm $(patsubst %.tex,%.aux,$(SOURCE_DOCUMENT)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.bbl,$(SOURCE_DOCUMENT)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.blg,$(SOURCE_DOCUMENT)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.fdb_latexmk,$(SOURCE_DOCUMENT)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.fls,$(SOURCE_DOCUMENT)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.log,$(SOURCE_DOCUMENT)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.out,$(SOURCE_DOCUMENT)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.ilg,$(SOURCE_DOCUMENT)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.toc,$(SOURCE_DOCUMENT)) 2> /dev/null
 	-@rm $(PDF_DOCUMENT)
 	-@rm $(DVI_DOCUMENT)
 	-@rm $(HTML_DOCUMENT)
 	-@rm $(MAN_DOCUMENT)
-	-@rm $(patsubst %.tex,%.pdf,$(TEX_FILES)) 2> /dev/null
-	-@rm $(patsubst %.tex,%.aux,$(TEX_FILES)) 2> /dev/null
-	-@rm $(patsubst %.tex,%.bbl,$(TEX_FILES)) 2> /dev/null
-	-@rm $(patsubst %.tex,%.blg,$(TEX_FILES)) 2> /dev/null
-	-@rm $(patsubst %.tex,%.fdb_latexmk,$(TEX_FILES)) 2> /dev/null
-	-@rm $(patsubst %.tex,%.fls,$(TEX_FILES)) 2> /dev/null
-	-@rm $(patsubst %.tex,%.log,$(TEX_FILES)) 2> /dev/null
-	-@rm $(patsubst %.tex,%.out,$(TEX_FILES)) 2> /dev/null
-	-@rm $(patsubst %.tex,%.toc,$(TEX_FILES)) 2> /dev/null
 	#-@rm $(FIGS) 2> /dev/null
 	-@rm $(PYTHONTEX_FILE)
 	-@rm -rf pythontex-files-main/
+	-@rm -rf $(DEPS_DIR)
 
 revealjs: $(SOURCE_DOCUMENT) ## Create a revealjs presentation
+	$(ECHO) Creating revealjs presentation...
 	$(PANDOC) --mathjax -s -f latex -t revealjs $(SOURCE_DOCUMENT)
 
 man: $(SOURCE_DOCUMENT) ## Create a man document
+	$(ECHO) Creating man pages...
 	$(PANDOC) -s -f latex -t man $(SOURCE_DOCUMENT) -o $(MAN_DOCUMENT)
 
 html: $(SOURCE_DOCUMENT) ## Create an html5 document
+	$(ECHO) Compiling html document...
 	$(PANDOC) --mathjax -s -f latex -t html5 $(SOURCE_DOCUMENT) -o $(HTML_DOCUMENT)
 
-todo: ## Print the todos from the main document
+todo: $(INCLUDES_DEP) ## Print the todos from the main document
+	$(ECHO) Paring \\TODO{} in $(SOURCE_DOCUMENT)
 	@sed -n "/\\TODO{/,/}/\
 	{\
 		s/.TODO/===/; \
 		s/[{]//g; \
 		s/[}]/===/g; \
 		p\
-	}" $(SOURCE_DOCUMENT)
+	}" $(SOURCE_DOCUMENT) $(INCLUDES)
 
 test: ## See some make variables for debugging
-	@echo DEPENDENCIES
-	@echo ============
-	@echo $(DEPENDENCIES) | tr " " "\n"
+	$(ECHO) DEPENDENCIES
+	$(ECHO) ============
+	$(ECHO) $(DEPENDENCIES) | tr " " "\n"
+
+purge: clean
+	$(ECHO) Purging files across directories... be careful
+	@echo "$(PURGE_SUFFIXES)" \
+	| tr "%" "*" \
+	| xargs -n1  find . -name \
+	| while read i; do echo $$i ; rm $$i; done
+
 
 help: ## Prints help for targets with comments
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
+	| sort \
+	| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
 
 # vim: nospell fdm=marker
