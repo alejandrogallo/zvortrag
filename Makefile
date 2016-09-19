@@ -1,29 +1,35 @@
-
+#local configuration
+-include config.mk
 # PARAMETERS, OVERRIDE THESE
-SOURCE_DOCUMENT = main.tex
-BIBTEX_FILE     = $(patsubst %.tex,%.bib,$(SOURCE_DOCUMENT))
-FIGS_DIR        = images
-DEPS_DIR        = deps
-PDF_VIEWER      = mupdf
-LATEX           = pdflatex
-PDFLATEX        = pdflatex
-ASYMPTOTE       = asy
-SH              = bash
-PY              = python
-GNUPLOT         = gnuplot
-pandoc          = pandoc
-BIBTEX          = bibtex
-LOCAL_CONF      = config.mk
+SOURCE_DOCUMENT ?= main.tex
+BIBTEX_FILE     ?= $(patsubst %.tex,%.bib,$(SOURCE_DOCUMENT))
+DEPS_DIR        ?= deps
+PDF_VIEWER      ?= mupdf
+LATEX           ?= pdflatex
+PDFLATEX        ?= pdflatex
+ASYMPTOTE       ?= asy
+SH              ?= bash
+PY              ?= python
+GNUPLOT         ?= gnuplot
+pandoc          ?= pandoc
+BIBTEX          ?= bibtex
+# Use greadlink in osx
+READLINK        ?= readlink
 # Do you use pythontex?
-DEPENDENCIES    =
-FIGS            =
-INCLUDES        =
-AUTO_FIG_DEPS   = 1
-AUTO_INC_DEPS   = 1
-WITH_PYTHONTEX  = 0
-PYTHONTEX       = pythontex
-ECHO            = @echo "\033[0;35m===>\033[0m"
-QUIET           = 0
+DEPENDENCIES    ?=
+FIGURES         ?=
+# sources included through \include
+INCLUDES        ?=
+FIGS_DIR        ?= images
+# it generates the figures needed
+# if 0 it looks for all scripts in FIGS_DIR
+AUTO_FIG_DEPS   ?= 1
+AUTO_INC_DEPS   ?= 1
+WITH_PYTHONTEX  ?= 0
+PYTHONTEX       ?= pythontex
+ECHO            ?= @echo "\033[0;35m===>\033[0m"
+# if 1 run commands quietly
+QUIET           ?= 0
 
 ifneq ($(QUIET),0)
 	FD_OUTPUT = 2>&1 > /dev/null
@@ -32,8 +38,8 @@ else
 endif
 
 
-PDF_DOCUMENT   = $(shell readlink -f $(patsubst %.tex,%.pdf,$(SOURCE_DOCUMENT)))
-DVI_DOCUMENT   = $(shell readlink -f $(patsubst %.tex,%.dvi,$(SOURCE_DOCUMENT)))
+PDF_DOCUMENT   = $(shell $(READLINK) -f $(patsubst %.tex,%.pdf,$(SOURCE_DOCUMENT)))
+DVI_DOCUMENT   = $(shell $(READLINK) -f $(patsubst %.tex,%.dvi,$(SOURCE_DOCUMENT)))
 MAN_DOCUMENT   = $(patsubst %.tex,%.1,$(SOURCE_DOCUMENT))
 HTML_DOCUMENT  = $(patsubst %.tex,%.html,$(SOURCE_DOCUMENT))
 TOC_FILE       = $(patsubst %.tex,%.toc,$(SOURCE_DOCUMENT))
@@ -52,7 +58,7 @@ FIGS_DEP       = $(DEPS_DIR)/figs.d
 
 ifeq ($(AUTO_INC_DEPS),1)
 	include $(INCLUDES_DEP)
-endif 
+endif
 
 ifneq ($(AUTO_FIG_DEPS),1)
 # for libs and such
@@ -63,7 +69,7 @@ ifneq ($(AUTO_FIG_DEPS),1)
 	GNUPLOT_PDF_FILES = $(patsubst %.gnuplot,%.pdf,$(GNUPLOT_FILES))
 	TEX_FILES         = $(filter-out $(IGNORE_FIGS),$(shell find $(FIGS_DIR) | grep .tex))
 	TEX_PDF_FILES     = $(patsubst %.tex,%.pdf,$(TEX_FILES))
-	FIGS=$(TEX_PDF_FILES) $(ASY_PDF_FILES) $(GNUPLOT_PDF_FILES)
+	FIGURES=$(TEX_PDF_FILES) $(ASY_PDF_FILES) $(GNUPLOT_PDF_FILES)
 else
 	include $(FIGS_DEP)
 endif
@@ -71,7 +77,7 @@ endif
 .PHONY: view-pdf open-pdf $(PDF_VIEWER) todo help test force purge
 
 # Main dependencies for BUILD_DOCUMENT
-DEPENDENCIES += $(SOURCE_DOCUMENT) $(INCLUDES) $(FIGS) $(TOC_FILE)
+DEPENDENCIES += $(SOURCE_DOCUMENT) $(INCLUDES) $(FIGURES) $(TOC_FILE)
 
 # Bibtex dependency
 ifneq ("$(wildcard $(BIBTEX_FILE))","")
@@ -111,7 +117,7 @@ open-pdf: ## Open pdf build document
 	-@ps aux | grep -v grep \
 	| grep "$(PDF_VIEWER)" \
 	| grep -q "$(BUILD_DOCUMENT)" \
-	||  $(PDF_VIEWER) "$(BUILD_DOCUMENT)" &
+	||  $(PDF_VIEWER) "$(BUILD_DOCUMENT)" 2>&1 > /dev/null &
 
 mupdf: ## Refresh mupdf
 	-@ps aux \
@@ -147,24 +153,25 @@ $(TOC_FILE): $(TOC_DEP)
 
 $(TOC_DEP): $(SOURCE_DOCUMENT) $(INCLUDES_DEP)
 	$(ECHO) Parsing the toc entries
-	mkdir -p $(dir $@)
-	grep -E '\\(section|subsection|subsubsection|chapter|part|subsubsubsection).' $(SOURCE_DOCUMENT) $(INCLUDES)  \
-	| sed 's/.*{\(.*\)}.*/\1/' >> $@
+	@mkdir -p $(dir $@)
+	@grep -E '\\(section|subsection|subsubsection|chapter|part|subsubsubsection).' $(SOURCE_DOCUMENT) $(INCLUDES)  \
+	| sed 's/.*{\(.*\)}.*/\1/' > $@.control
+	@if ! diff $@ $@.control > /dev/null ; then mv $@.control $@; fi
 
 $(INCLUDES_DEP): $(SOURCE_DOCUMENT)
 	$(ECHO) Parsing the includes dependencies
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	@echo INCLUDES = \\ > $@
 	#@ Include statements should not have a .tex extension
 	#@ so we are forced to add it
-	grep -E '\\include[^gp]' $<  \
+	@grep -E '\\include[^gp]' $<  \
 	| sed 's/.*{\(.*\)}.*/\1.tex \\/' >> $@
 
 $(FIGS_DEP): $(SOURCE_DOCUMENT) $(INCLUDES_DEP)
 	$(ECHO) Parsing the graphics dependencies
-	mkdir -p $(dir $@)
-	@echo FIGS = \\ > $@
-	grep -E '\\include(graphic|pdf).' $(SOURCE_DOCUMENT) $(INCLUDES)  \
+	@mkdir -p $(dir $@)
+	@echo FIGURES = \\ > $@
+	@grep -E '\\include(graphic|pdf).' $(SOURCE_DOCUMENT) $(INCLUDES)  \
 	| sed 's/.*{\(.*\)}.*/\1 \\/' >> $@
 
 #.PHONY: $(DEPS_DIR)/includes.d $(DEPS_DIR)/figures.d
@@ -185,7 +192,7 @@ clean: ## Remove build and temporary files
 	-@rm $(DVI_DOCUMENT)
 	-@rm $(HTML_DOCUMENT)
 	-@rm $(MAN_DOCUMENT)
-	#-@rm $(FIGS) 2> /dev/null
+	#-@rm $(FIGURES) 2> /dev/null
 	-@rm $(PYTHONTEX_FILE)
 	-@rm -rf pythontex-files-main/
 	-@rm -rf $(DEPS_DIR)
@@ -203,7 +210,7 @@ html: $(SOURCE_DOCUMENT) ## Create an html5 document
 	$(PANDOC) --mathjax -s -f latex -t html5 $(SOURCE_DOCUMENT) -o $(HTML_DOCUMENT)
 
 todo: $(INCLUDES_DEP) ## Print the todos from the main document
-	$(ECHO) Paring \\TODO{} in $(SOURCE_DOCUMENT)
+	$(ECHO) Parsing \\TODO{} in $(SOURCE_DOCUMENT)
 	@sed -n "/\\TODO{/,/}/\
 	{\
 		s/.TODO/===/; \
@@ -216,6 +223,7 @@ test: ## See some make variables for debugging
 	$(ECHO) DEPENDENCIES
 	$(ECHO) ============
 	$(ECHO) $(DEPENDENCIES) | tr " " "\n"
+	@echo $(MAKEFILE_LIST)
 
 purge: clean
 	$(ECHO) Purging files across directories... be careful
@@ -226,9 +234,7 @@ purge: clean
 
 
 help: ## Prints help for targets with comments
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
-	| sort \
-	| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@awk 'BEGIN {FS = ":.*?## "}; /^[a-zA-Z_-]+:.*?## .*$$/{printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' Makefile
 
 
 # vim: nospell fdm=marker
