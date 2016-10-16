@@ -49,6 +49,7 @@ HTML_DOCUMENT  = $(patsubst %.tex,%.html,$(SOURCE_DOCUMENT))
 TOC_FILE       = $(patsubst %.tex,%.toc,$(SOURCE_DOCUMENT))
 BIBITEM_FILE   = $(patsubst %.bib,%.bbl,$(BIBTEX_FILE))
 PYTHONTEX_FILE = $(patsubst %.tex,%.pytxcode,$(SOURCE_DOCUMENT))
+PDFPC_FILE     = $(shell $(READLINK) -f $(patsubst %.tex,%.pdfpc,$(SOURCE_DOCUMENT)))
 FIGS_SUFFIXES  = %.pdf %.eps %.png %.jpg %.jpeg %.gif %.dvi %.bmp %.svg %.ps
 PURGE_SUFFIXES = %.aux %.bbl %.blg %.fdb_latexmk %.fls %.log %.out %.ilg %.toc
 BUILD_DOCUMENT = $(PDF_DOCUMENT)
@@ -224,6 +225,31 @@ todo: $(INCLUDES_DEP) ## Print the todos from the main document
 		s/[}]/===/g; \
 		p\
 	}" $(SOURCE_DOCUMENT) $(INCLUDES)
+
+pdf-presenter-console: $(PDFPC_FILE) ## Create annotations file for the pdfpc program
+$(PDFPC_FILE): $(SOURCE_DOCUMENT)
+	echo "[file]" > $@
+	echo "$(PDF_DOCUMENT)" >> $@
+	echo "[notes]" >> $@
+	cat $(SOURCE_DOCUMENT) | awk '\
+		BEGIN { frame = 0; initialized = 0; } \
+		/(\\begin{frame}|\\frame{)/ { \
+			if(!/[%]/) { \
+				frame++; print "###",frame \
+			} \
+		} \
+		/\\note{/,/^\s*}\s*$$/ { \
+			if(!/\\note{/ && !/^[ ]*}[ ]*$$/) {\
+				if (frame == 0 && initialized == 0){ \
+					frame++; \
+					print "###",frame; \
+					initialized = 1; \
+				} \
+				print $$0 ; \
+			}\
+		} \
+		END { print frame } \
+	' | tee -a $@
 
 test: ## See some make variables for debugging
 	$(ECHO) DEPENDENCIES
