@@ -11,11 +11,10 @@ ASYMPTOTE       ?= asy
 SH              ?= bash
 PY              ?= python
 GNUPLOT         ?= gnuplot
-pandoc          ?= pandoc
+PANDOC          ?= pandoc
 BIBTEX          ?= bibtex
 # Use greadlink in osx
 READLINK        ?= readlink
-# Do you use pythontex?
 DEPENDENCIES    ?=
 FIGURES         ?=
 # sources included through \include
@@ -26,10 +25,15 @@ FIGS_DIR        ?= images
 AUTO_FIG_DEPS   ?= 1
 AUTO_INC_DEPS   ?= 1
 WITH_PYTHONTEX  ?= 0
+# Do you use pythontex?
 PYTHONTEX       ?= pythontex
-ECHO            ?= @echo "\033[0;35m===>\033[0m"
+ECHO            = @echo "\033[0;35m===>\033[0m"
 # if 1 run commands quietly
 QUIET           ?= 0
+
+
+.DEFAULT_GOAL   := all
+
 
 ifneq ($(QUIET),0)
 	FD_OUTPUT = 2>&1 > /dev/null
@@ -92,9 +96,10 @@ endif
 
 all: $(BUILD_DOCUMENT) view-pdf ## (Default) Create BUILD_DOCUMENT
 
+
 $(BUILD_DOCUMENT): $(DEPENDENCIES)
 
-force: ## Force creation of BUILD_DOCUMENT (for bibtex)
+force: ## Force creation of BUILD_DOCUMENT
 	-rm $(BUILD_DOCUMENT)
 	$(MAKE) $(BUILD_DOCUMENT)
 
@@ -104,9 +109,10 @@ $(BIBITEM_FILE): $(BIBTEX_FILE)
 	$(ECHO) Compiling again $(BUILD_DOCUMENT) to update refs
 	$(MAKE) force
 
+#FIXME: find a way of not having to compile the main document again
 %.pytxcode: %.tex
 	$(ECHO) "Compiling latex for pythontex"
-	$(MAKE) force
+	$(PDFLATEX) $<
 	$(ECHO) "Creating pythontex"
 	$(PYTHONTEX) $<
 
@@ -162,9 +168,9 @@ $(INCLUDES_DEP): $(SOURCE_DOCUMENT)
 	$(ECHO) Parsing the includes dependencies
 	@mkdir -p $(dir $@)
 	@echo INCLUDES = \\ > $@
-	#@ Include statements should not have a .tex extension
-	#@ so we are forced to add it
-	@grep -E '\\include[^gp]' $<  \
+#@ Include statements should not have a .tex extension
+#@ so we are forced to add it
+	@grep -E '\\(include|input)[^gp]' $<  \
 	| sed 's/.*{\(.*\)}.*/\1.tex \\/' >> $@
 
 $(FIGS_DEP): $(SOURCE_DOCUMENT) $(INCLUDES_DEP)
@@ -188,14 +194,14 @@ clean: ## Remove build and temporary files
 	-@rm $(patsubst %.tex,%.out,$(SOURCE_DOCUMENT)) 2> /dev/null
 	-@rm $(patsubst %.tex,%.ilg,$(SOURCE_DOCUMENT)) 2> /dev/null
 	-@rm $(patsubst %.tex,%.toc,$(SOURCE_DOCUMENT)) 2> /dev/null
-	-@rm $(PDF_DOCUMENT)
-	-@rm $(DVI_DOCUMENT)
-	-@rm $(HTML_DOCUMENT)
-	-@rm $(MAN_DOCUMENT)
-	#-@rm $(FIGURES) 2> /dev/null
-	-@rm $(PYTHONTEX_FILE)
-	-@rm -rf pythontex-files-main/
-	-@rm -rf $(DEPS_DIR)
+	-@rm $(PDF_DOCUMENT) 2> /dev/null
+	-@rm $(DVI_DOCUMENT) 2> /dev/null
+	-@rm $(HTML_DOCUMENT) 2> /dev/null
+	-@rm $(MAN_DOCUMENT) 2> /dev/null
+#-@rm $(FIGURES) 2> /dev/null
+	-@rm $(PYTHONTEX_FILE) 2> /dev/null
+	-@rm -rf pythontex-files-main/ 2> /dev/null
+	-@rm -rf $(DEPS_DIR) 2> /dev/null
 
 revealjs: $(SOURCE_DOCUMENT) ## Create a revealjs presentation
 	$(ECHO) Creating revealjs presentation...
@@ -234,7 +240,7 @@ purge: clean
 
 
 help: ## Prints help for targets with comments
-	@awk 'BEGIN {FS = ":.*?## "}; /^[a-zA-Z_-]+:.*?## .*$$/{printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' Makefile
+	@awk 'BEGIN {FS = ":.*?## "}; /^[a-zA-Z_-]+:.*?## .*$$/{printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 
 # vim: nospell fdm=marker
