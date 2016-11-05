@@ -211,9 +211,15 @@ clean: ## Remove build and temporary files
 	-@rm -rf $(DEPS_DIR) 2> /dev/null
 
 #PANDOC CONVERSIONS
+###################
+
+# FIXME: It doesn't work out of the box
+REVEALJS_SRC ?= https://github.com/hakimel/reveal.js/
 revealjs: $(SOURCE_DOCUMENT) ## Create a revealjs presentation
 	$(ECHO) Creating revealjs presentation...
-	$(PANDOC) --mathjax -s -f latex -t revealjs $(SOURCE_DOCUMENT)
+	$(ECHO) Gettin revealjs from $(REVEALJS_SRC)
+	git clone --depth=1 $(REVEALJS_SRC) && rm -rf reveal.js/.git
+	$(PANDOC) --mathjax -s -f latex -t revealjs $(SOURCE_DOCUMENT) -o $(HTML_DOCUMENT)
 man: $(SOURCE_DOCUMENT) ## Create a man document
 	$(ECHO) Creating man pages...
 	$(PANDOC) -s -f latex -t man $(SOURCE_DOCUMENT) -o $(MAN_DOCUMENT)
