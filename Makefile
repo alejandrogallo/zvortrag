@@ -10,6 +10,10 @@ PDFLATEX        ?= pdflatex
 ASYMPTOTE       ?= asy
 SH              ?= bash
 PY              ?= python
+GREP            ?= grep
+SED             ?= sed
+AWK             ?= awk
+FIND            ?= find
 GNUPLOT         ?= gnuplot
 PANDOC          ?= pandoc
 BIBTEX          ?= bibtex
@@ -27,9 +31,11 @@ AUTO_INC_DEPS   ?= 1
 WITH_PYTHONTEX  ?= 0
 # Do you use pythontex?
 PYTHONTEX       ?= pythontex
-ECHO            = @echo "\033[0;35m===>\033[0m"
+ECHO            ?= @echo "\033[0;35m===>\033[0m"
 # if 1 run commands quietly
 QUIET           ?= 0
+PREFIX          ?= $(PWD)
+DIST_DIR        ?= $(PREFIX)/dist
 
 
 .DEFAULT_GOAL   := all
@@ -68,18 +74,18 @@ endif
 ifneq ($(AUTO_FIG_DEPS),1)
 # for libs and such
 	IGNORE_FIGS       = $(FIGS_DIR)/atoms.asy $(FIGS_DIR)/resources.asy
-	ASY_FILES         = $(filter-out $(IGNORE_FIGS),$(shell find $(FIGS_DIR) | grep .asy))
+	ASY_FILES         = $(filter-out $(IGNORE_FIGS),$(shell $(FIND) $(FIGS_DIR) | $(GREP) .asy))
 	ASY_PDF_FILES     = $(patsubst %.asy,%.pdf,$(ASY_FILES))
-	GNUPLOT_FILES     = $(filter-out $(IGNORE_FIGS),$(shell find $(FIGS_DIR) | grep .gnuplot))
+	GNUPLOT_FILES     = $(filter-out $(IGNORE_FIGS),$(shell $(FIND) $(FIGS_DIR) | $(GREP) .gnuplot))
 	GNUPLOT_PDF_FILES = $(patsubst %.gnuplot,%.pdf,$(GNUPLOT_FILES))
-	TEX_FILES         = $(filter-out $(IGNORE_FIGS),$(shell find $(FIGS_DIR) | grep .tex))
+	TEX_FILES         = $(filter-out $(IGNORE_FIGS),$(shell $(FIND) $(FIGS_DIR) | $(GREP) .tex))
 	TEX_PDF_FILES     = $(patsubst %.tex,%.pdf,$(TEX_FILES))
 	FIGURES=$(TEX_PDF_FILES) $(ASY_PDF_FILES) $(GNUPLOT_PDF_FILES)
 else
 	include $(FIGS_DEP)
 endif
 
-.PHONY: view-pdf open-pdf $(PDF_VIEWER) todo help test force purge
+.PHONY: view-pdf open-pdf $(PDF_VIEWER) todo help test force purge dist
 
 # Main dependencies for BUILD_DOCUMENT
 DEPENDENCIES += $(SOURCE_DOCUMENT) $(INCLUDES) $(FIGURES) $(TOC_FILE)
@@ -121,17 +127,17 @@ $(BIBITEM_FILE): $(BIBTEX_FILE)
 view-pdf: $(PDF_VIEWER) open-pdf ## Refresh and open pdf
 
 open-pdf: ## Open pdf build document
-	-@ps aux | grep -v grep \
-	| grep "$(PDF_VIEWER)" \
-	| grep -q "$(BUILD_DOCUMENT)" \
+	-@ps aux | $(GREP) -v $(GREP) \
+	| $(GREP) "$(PDF_VIEWER)" \
+	| $(GREP) -q "$(BUILD_DOCUMENT)" \
 	||  $(PDF_VIEWER) "$(BUILD_DOCUMENT)" 2>&1 > /dev/null &
 
 mupdf: ## Refresh mupdf
 	-@ps aux \
-	| grep -v grep \
-	| grep "$(PDF_VIEWER)" \
-	| grep "$(BUILD_DOCUMENT)" \
-	| awk '{print $$2}'\
+	| $(GREP) -v $(GREP) \
+	| $(GREP) "$(PDF_VIEWER)" \
+	| $(GREP) "$(BUILD_DOCUMENT)" \
+	| $(AWK) '{print $$2}'\
 	| xargs -n1 kill -s SIGHUP
 
 $(FIGS_SUFFIXES): %.asy
@@ -161,8 +167,8 @@ $(TOC_FILE): $(TOC_DEP)
 $(TOC_DEP): $(SOURCE_DOCUMENT) $(INCLUDES_DEP)
 	$(ECHO) Parsing the toc entries
 	@mkdir -p $(dir $@)
-	@grep -E '\\(section|subsection|subsubsection|chapter|part|subsubsubsection).' $(SOURCE_DOCUMENT) $(INCLUDES)  \
-	| sed 's/.*{\(.*\)}.*/\1/' > $@.control
+	@$(GREP) -E '\\(section|subsection|subsubsection|chapter|part|subsubsubsection).' $(SOURCE_DOCUMENT) $(INCLUDES)  \
+	| $(SED) 's/.*{\(.*\)}.*/\1/' > $@.control
 	@if ! diff $@ $@.control > /dev/null ; then mv $@.control $@; fi
 
 $(INCLUDES_DEP): $(SOURCE_DOCUMENT)
@@ -171,15 +177,15 @@ $(INCLUDES_DEP): $(SOURCE_DOCUMENT)
 	@echo INCLUDES = \\ > $@
 #@ Include statements should not have a .tex extension
 #@ so we are forced to add it
-	@grep -E '\\(include|input)[^gp]' $<  \
-	| sed 's/.*{\(.*\)}.*/\1.tex \\/' >> $@
+	@$(GREP) -E '\\(include|input)[^gp]' $<  \
+	| $(SED) 's/.*{\(.*\)}.*/\1.tex \\/' >> $@
 
 $(FIGS_DEP): $(SOURCE_DOCUMENT) $(INCLUDES_DEP)
 	$(ECHO) Parsing the graphics dependencies
 	@mkdir -p $(dir $@)
 	@echo FIGURES = \\ > $@
-	@grep -E '\\include(graphic|pdf).' $(SOURCE_DOCUMENT) $(INCLUDES)  \
-	| sed 's/.*{\(.*\)}.*/\1 \\/' >> $@
+	@$(GREP) -E '\\include(graphic|pdf).' $(SOURCE_DOCUMENT) $(INCLUDES)  \
+	| $(SED) 's/.*{\(.*\)}.*/\1 \\/' >> $@
 
 #.PHONY: $(DEPS_DIR)/includes.d $(DEPS_DIR)/figures.d
 # vim-run: clear; make deps/includes.d ; make test
@@ -204,21 +210,20 @@ clean: ## Remove build and temporary files
 	-@rm -rf pythontex-files-main/ 2> /dev/null
 	-@rm -rf $(DEPS_DIR) 2> /dev/null
 
+#PANDOC CONVERSIONS
 revealjs: $(SOURCE_DOCUMENT) ## Create a revealjs presentation
 	$(ECHO) Creating revealjs presentation...
 	$(PANDOC) --mathjax -s -f latex -t revealjs $(SOURCE_DOCUMENT)
-
 man: $(SOURCE_DOCUMENT) ## Create a man document
 	$(ECHO) Creating man pages...
 	$(PANDOC) -s -f latex -t man $(SOURCE_DOCUMENT) -o $(MAN_DOCUMENT)
-
 html: $(SOURCE_DOCUMENT) ## Create an html5 document
 	$(ECHO) Compiling html document...
 	$(PANDOC) --mathjax -s -f latex -t html5 $(SOURCE_DOCUMENT) -o $(HTML_DOCUMENT)
 
 todo: $(INCLUDES_DEP) ## Print the todos from the main document
 	$(ECHO) Parsing \\TODO{} in $(SOURCE_DOCUMENT)
-	@sed -n "/\\TODO{/,/}/\
+	@$(SED) -n "/\\TODO{/,/}/\
 	{\
 		s/.TODO/===/; \
 		s/[{]//g; \
@@ -231,7 +236,7 @@ $(PDFPC_FILE): $(SOURCE_DOCUMENT)
 	echo "[file]" > $@
 	echo "$(PDF_DOCUMENT)" >> $@
 	echo "[notes]" >> $@
-	cat $(SOURCE_DOCUMENT) | awk '\
+	cat $(SOURCE_DOCUMENT) | $(AWK) '\
 		BEGIN { frame = 0; initialized = 0; } \
 		/(\\begin{frame}|\\frame{)/ { \
 			if(!/[%]/) { \
@@ -251,22 +256,46 @@ $(PDFPC_FILE): $(SOURCE_DOCUMENT)
 		END { print frame } \
 	' | tee -a $@
 
+dist: $(BUILD_DOCUMENT) ## Create a dist folder with the bare minimum to compile
+	$(ECHO) "Creating dist folder"
+	@mkdir -p $(DIST_DIR)
+	$(ECHO) "Copying the Makefile"
+	@cp Makefile $(DIST_DIR)/
+	$(ECHO) "Copying the target document"
+	@cp $(BUILD_DOCUMENT) $(DIST_DIR)/
+	$(ECHO) "Creating folder for dependencies"
+	@echo $(DEPENDENCIES)\
+	 | xargs -n1 dirname\
+	 | xargs -n1 -I FF mkdir -p $(DIST_DIR)/FF
+	$(ECHO) "Copying dependencies"
+	@echo $(DEPENDENCIES)\
+	 | tr " " "\n" \
+	 | xargs -n1 -I FF cp FF $(DIST_DIR)/FF
+
+watch: ## Build if changes
+	(echo $(SOURCE_DOCUMENT) | entr make )&
+unwatch: ## Cancel Watching
+	killall entr
+
 test: ## See some make variables for debugging
 	$(ECHO) DEPENDENCIES
 	$(ECHO) ============
 	$(ECHO) $(DEPENDENCIES) | tr " " "\n"
 	@echo $(MAKEFILE_LIST)
 
-purge: clean
+tags: $(SOURCE_DOCUMENT) $(INCLUDES_DEP) ## Create TeX exhuberant ctags
+	ctags --language-force=tex -R *
+
+purge: clean ## Remove recursively with suffixes in PURGE_SUFFIXES
 	$(ECHO) Purging files across directories... be careful
 	@echo "$(PURGE_SUFFIXES)" \
 	| tr "%" "*" \
-	| xargs -n1  find . -name \
+	| xargs -n1  $(FIND) . -name \
 	| while read i; do echo $$i ; rm $$i; done
 
 
 help: ## Prints help for targets with comments
-	@awk 'BEGIN {FS = ":.*?## "}; /^[a-zA-Z_-]+:.*?## .*$$/{printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@$(AWK) 'BEGIN {FS = ":.*?## "}; /^[a-zA-Z_-]+:.*?## .*$$/{printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 
 # vim: nospell fdm=marker
