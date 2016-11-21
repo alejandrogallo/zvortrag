@@ -1,37 +1,66 @@
 #local configuration
 -include config.mk
+
+ifeq ($(shell uname),Linux)
+LINUX := 1
+OSX   :=
+else
+LINUX :=
+OSX   := 1
+endif
+
+
 # PARAMETERS, OVERRIDE THESE
-SOURCE_DOCUMENT ?= main.tex
-BIBTEX_FILE     ?= $(patsubst %.tex,%.bib,$(SOURCE_DOCUMENT))
-DEPS_DIR        ?= deps
-PDF_VIEWER      ?= mupdf
-LATEX           ?= pdflatex
-PDFLATEX        ?= pdflatex
-ASYMPTOTE       ?= asy
+############################
+
+#Shell utilities
 SH              ?= bash
 PY              ?= python
 GREP            ?= grep
-SED             ?= sed
-AWK             ?= awk
-FIND            ?= find
+SED             ?= $(if $(OSX),gsed,sed)
+AWK             ?= $(if $(OSX),gawk,awk)
+CTAGS           ?= ctags
+READLINK        ?= $(if $(OSX),greadlink,readlink)
+XARGS           ?= xargs
+TR              ?= tr
+GIT             ?= git
+WHICH           ?= which
+ECHO            ?= @echo -e "\033[0;35m===>\033[0m"
+
+# Function to try to discover automatically
+# the main latex document
+discoverMain = $(shell \
+                   $(GREP) -H '\\begin{document}' *.tex 2>/dev/null \
+                   | head -1 \
+                   | $(AWK) -F ":" '{print $$1}')
+
+#MAIN_SRC        ?= main.tex
+MAIN_SRC        ?= $(call discoverMain) # Discover automatically
+BIBTEX_FILE     ?= $(patsubst %.tex,%.bib,$(MAIN_SRC))
+DEPS_DIR        ?= deps
+PDF_VIEWER      ?= $(or \
+$(shell $(WHICH) zathura 2> /dev/null),\
+$(shell $(WHICH) mupdf 2> /dev/null),\
+$(shell $(WHICH) mupdf-x11 2> /dev/null),\
+$(shell $(WHICH) evince 2> /dev/null),\
+$(shell $(WHICH) okular 2> /dev/null),\
+$(shell $(WHICH) xdg-open 2> /dev/null),\
+$(shell $(WHICH) open 2> /dev/null),\
+)
+LATEX           ?= pdflatex
+TEX_LINTER      ?= chktex
+PDFLATEX        ?= pdflatex
+ASYMPTOTE       ?= asy
 GNUPLOT         ?= gnuplot
 PANDOC          ?= pandoc
 BIBTEX          ?= bibtex
-# Use greadlink in osx
-READLINK        ?= readlink
 DEPENDENCIES    ?=
 FIGURES         ?=
 # sources included through \include
 INCLUDES        ?=
-FIGS_DIR        ?= images
-# it generates the figures needed
-# if 0 it looks for all scripts in FIGS_DIR
-AUTO_FIG_DEPS   ?= 1
-AUTO_INC_DEPS   ?= 1
-WITH_PYTHONTEX  ?= 0
+WITH_PYTHONTEX  ?=
 # Do you use pythontex?
 PYTHONTEX       ?= pythontex
-ECHO            ?= @echo "\033[0;35m===>\033[0m"
 # if 1 run commands quietly
 QUIET           ?= 0
 PREFIX          ?= $(PWD)
@@ -47,59 +76,50 @@ else
 	FD_OUTPUT =
 endif
 
+# Do this only if MAIN_SRC is defined
+ifneq ($(strip $(MAIN_SRC)),)
 
-PDF_DOCUMENT   = $(shell $(READLINK) -f $(patsubst %.tex,%.pdf,$(SOURCE_DOCUMENT)))
-DVI_DOCUMENT   = $(shell $(READLINK) -f $(patsubst %.tex,%.dvi,$(SOURCE_DOCUMENT)))
-MAN_DOCUMENT   = $(patsubst %.tex,%.1,$(SOURCE_DOCUMENT))
-HTML_DOCUMENT  = $(patsubst %.tex,%.html,$(SOURCE_DOCUMENT))
-TOC_FILE       = $(patsubst %.tex,%.toc,$(SOURCE_DOCUMENT))
+PDF_DOCUMENT   = $(shell $(READLINK) -f $(patsubst %.tex,%.pdf,$(MAIN_SRC)))
+DVI_DOCUMENT   = $(shell $(READLINK) -f $(patsubst %.tex,%.dvi,$(MAIN_SRC)))
+MAN_DOCUMENT   = $(patsubst %.tex,%.1,$(MAIN_SRC))
+HTML_DOCUMENT  = $(patsubst %.tex,%.html,$(MAIN_SRC))
+TOC_FILE       = $(patsubst %.tex,%.toc,$(MAIN_SRC))
 BIBITEM_FILE   = $(patsubst %.bib,%.bbl,$(BIBTEX_FILE))
-PYTHONTEX_FILE = $(patsubst %.tex,%.pytxcode,$(SOURCE_DOCUMENT))
-PDFPC_FILE     = $(shell $(READLINK) -f $(patsubst %.tex,%.pdfpc,$(SOURCE_DOCUMENT)))
+PYTHONTEX_FILE = $(patsubst %.tex,%.pytxcode,$(MAIN_SRC))
+PDFPC_FILE     = $(shell $(READLINK) -f $(patsubst %.tex,%.pdfpc,$(MAIN_SRC)))
 FIGS_SUFFIXES  = %.pdf %.eps %.png %.jpg %.jpeg %.gif %.dvi %.bmp %.svg %.ps
 PURGE_SUFFIXES = %.aux %.bbl %.blg %.fdb_latexmk %.fls %.log %.out %.ilg %.toc
 BUILD_DOCUMENT = $(PDF_DOCUMENT)
 
-# These files are to keep track of the dependencies for
-# latex or pdf includes, table of contents generation or
-# figure recognition
+# These files  are to keep  track of the  dependencies for latex  or pdf
+# includes, table of contents generation or figure recognition
+#
 TOC_DEP        = $(DEPS_DIR)/toc.d
 INCLUDES_DEP   = $(DEPS_DIR)/includes.d
 FIGS_DEP       = $(DEPS_DIR)/figs.d
 
-ifeq ($(AUTO_INC_DEPS),1)
-	include $(INCLUDES_DEP)
-endif
+include $(INCLUDES_DEP)
+include $(FIGS_DEP)
 
-ifneq ($(AUTO_FIG_DEPS),1)
-# for libs and such
-	IGNORE_FIGS       = $(FIGS_DIR)/atoms.asy $(FIGS_DIR)/resources.asy
-	ASY_FILES         = $(filter-out $(IGNORE_FIGS),$(shell $(FIND) $(FIGS_DIR) | $(GREP) .asy))
-	ASY_PDF_FILES     = $(patsubst %.asy,%.pdf,$(ASY_FILES))
-	GNUPLOT_FILES     = $(filter-out $(IGNORE_FIGS),$(shell $(FIND) $(FIGS_DIR) | $(GREP) .gnuplot))
-	GNUPLOT_PDF_FILES = $(patsubst %.gnuplot,%.pdf,$(GNUPLOT_FILES))
-	TEX_FILES         = $(filter-out $(IGNORE_FIGS),$(shell $(FIND) $(FIGS_DIR) | $(GREP) .tex))
-	TEX_PDF_FILES     = $(patsubst %.tex,%.pdf,$(TEX_FILES))
-	FIGURES=$(TEX_PDF_FILES) $(ASY_PDF_FILES) $(GNUPLOT_PDF_FILES)
-else
-	include $(FIGS_DEP)
-endif
+endif #MAIN_SRC exists
 
-.PHONY: view-pdf open-pdf $(PDF_VIEWER) todo help test force purge dist
+
 
 # Main dependencies for BUILD_DOCUMENT
-DEPENDENCIES += $(SOURCE_DOCUMENT) $(INCLUDES) $(FIGURES) $(TOC_FILE)
+######################################
 
-# Bibtex dependency
-ifneq ("$(wildcard $(BIBTEX_FILE))","")
-	DEPENDENCIES += $(BIBITEM_FILE)
-endif
+DEPENDENCIES += \
+$(MAIN_SRC) \
+$(INCLUDES) \
+$(FIGURES) \
+$(TOC_FILE) \
+$(if $(wildcard $(BIBTEX_FILE)),$(BIBITEM_FILE)) \
+$(if $(WITH_PYTHONTEX),$(PYTHONTEX_FILE)) \
 
-# Pythontex support
-ifneq ($(WITH_PYTHONTEX),0)
-	DEPENDENCIES += $(PYTHONTEX_FILE)
-endif
 
+
+
+.PHONY: view-pdf open-pdf $(PDF_VIEWER) todo help test force purge dist releases
 
 all: $(BUILD_DOCUMENT) view-pdf ## (Default) Create BUILD_DOCUMENT
 
@@ -110,6 +130,14 @@ force: ## Force creation of BUILD_DOCUMENT
 	-rm $(BUILD_DOCUMENT)
 	$(MAKE) $(BUILD_DOCUMENT)
 
+# =======================
+# Bibliography generation
+# =======================
+#
+# This generates a bbl file from a  bib file For documents without a bib
+# file, this  will also be  targeted, bit  the '-' before  the $(BIBTEX)
+# ensures that the whole building doesn't fail because of it
+#
 $(BIBITEM_FILE): $(BIBTEX_FILE)
 	$(ECHO) "Compiling the bibliography"
 	-$(BIBTEX) $(patsubst %.bib,%,$(BIBTEX_FILE)) $(FD_OUTPUT)
@@ -132,17 +160,17 @@ open-pdf: ## Open pdf build document
 	| $(GREP) -q "$(BUILD_DOCUMENT)" \
 	||  $(PDF_VIEWER) "$(BUILD_DOCUMENT)" 2>&1 > /dev/null &
 
-mupdf: ## Refresh mupdf
+mupdf /usr/bin/mupdf: ## Refresh mupdf
 	-@ps aux \
 	| $(GREP) -v $(GREP) \
 	| $(GREP) "$(PDF_VIEWER)" \
 	| $(GREP) "$(BUILD_DOCUMENT)" \
 	| $(AWK) '{print $$2}'\
-	| xargs -n1 kill -s SIGHUP
+	| $(XARGS) -n1 kill -s SIGHUP
 
 $(FIGS_SUFFIXES): %.asy
 	$(ECHO) Compiling $<
-	cd $(dir $<) && $(ASYMPTOTE) -f $(shell echo $(suffix $@) | tr -d "\.") $(notdir $< ) $(FD_OUTPUT)
+	cd $(dir $<) && $(ASYMPTOTE) -f $(shell echo $(suffix $@) | $(TR) -d "\.") $(notdir $< ) $(FD_OUTPUT)
 
 $(FIGS_SUFFIXES): %.gnuplot
 	$(ECHO) Compiling $<
@@ -162,16 +190,16 @@ $(FIGS_SUFFIXES): %.tex
 
 $(TOC_FILE): $(TOC_DEP)
 	$(ECHO) Creating $(TOC_FILE)
-	cd $(dir $(SOURCE_DOCUMENT) ) && $(PDFLATEX) $(notdir $(SOURCE_DOCUMENT) ) $(FD_OUTPUT)
+	cd $(dir $(MAIN_SRC) ) && $(PDFLATEX) $(notdir $(MAIN_SRC) ) $(FD_OUTPUT)
 
-$(TOC_DEP): $(SOURCE_DOCUMENT) $(INCLUDES_DEP)
+$(TOC_DEP): $(MAIN_SRC) $(INCLUDES_DEP)
 	$(ECHO) Parsing the toc entries
 	@mkdir -p $(dir $@)
-	@$(GREP) -E '\\(section|subsection|subsubsection|chapter|part|subsubsubsection).' $(SOURCE_DOCUMENT) $(INCLUDES)  \
+	@$(GREP) -E '\\(section|subsection|subsubsection|chapter|part|subsubsubsection).' $(MAIN_SRC) $(INCLUDES)  \
 	| $(SED) 's/.*{\(.*\)}.*/\1/' > $@.control
 	@if ! diff $@ $@.control > /dev/null ; then mv $@.control $@; fi
 
-$(INCLUDES_DEP): $(SOURCE_DOCUMENT)
+$(INCLUDES_DEP): $(MAIN_SRC)
 	$(ECHO) Parsing the includes dependencies
 	@mkdir -p $(dir $@)
 	@echo INCLUDES = \\ > $@
@@ -180,27 +208,24 @@ $(INCLUDES_DEP): $(SOURCE_DOCUMENT)
 	@$(GREP) -E '\\(include|input)[^gp]' $<  \
 	| $(SED) 's/.*{\(.*\)}.*/\1.tex \\/' >> $@
 
-$(FIGS_DEP): $(SOURCE_DOCUMENT) $(INCLUDES_DEP)
+$(FIGS_DEP): $(MAIN_SRC) $(INCLUDES_DEP)
 	$(ECHO) Parsing the graphics dependencies
 	@mkdir -p $(dir $@)
 	@echo FIGURES = \\ > $@
-	@$(GREP) -E '\\include(graphic|pdf).' $(SOURCE_DOCUMENT) $(INCLUDES)  \
+	@$(GREP) -E '\\include(graphic|pdf).' $(MAIN_SRC) $(INCLUDES)  \
 	| $(SED) 's/.*{\(.*\)}.*/\1 \\/' >> $@
-
-#.PHONY: $(DEPS_DIR)/includes.d $(DEPS_DIR)/figures.d
-# vim-run: clear; make deps/includes.d ; make test
 
 clean: ## Remove build and temporary files
 	$(ECHO) Cleaning up...
-	-@rm $(patsubst %.tex,%.aux,$(SOURCE_DOCUMENT)) 2> /dev/null
-	-@rm $(patsubst %.tex,%.bbl,$(SOURCE_DOCUMENT)) 2> /dev/null
-	-@rm $(patsubst %.tex,%.blg,$(SOURCE_DOCUMENT)) 2> /dev/null
-	-@rm $(patsubst %.tex,%.fdb_latexmk,$(SOURCE_DOCUMENT)) 2> /dev/null
-	-@rm $(patsubst %.tex,%.fls,$(SOURCE_DOCUMENT)) 2> /dev/null
-	-@rm $(patsubst %.tex,%.log,$(SOURCE_DOCUMENT)) 2> /dev/null
-	-@rm $(patsubst %.tex,%.out,$(SOURCE_DOCUMENT)) 2> /dev/null
-	-@rm $(patsubst %.tex,%.ilg,$(SOURCE_DOCUMENT)) 2> /dev/null
-	-@rm $(patsubst %.tex,%.toc,$(SOURCE_DOCUMENT)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.aux,$(MAIN_SRC)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.bbl,$(MAIN_SRC)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.blg,$(MAIN_SRC)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.fdb_latexmk,$(MAIN_SRC)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.fls,$(MAIN_SRC)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.log,$(MAIN_SRC)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.out,$(MAIN_SRC)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.ilg,$(MAIN_SRC)) 2> /dev/null
+	-@rm $(patsubst %.tex,%.toc,$(MAIN_SRC)) 2> /dev/null
 	-@rm $(PDF_DOCUMENT) 2> /dev/null
 	-@rm $(DVI_DOCUMENT) 2> /dev/null
 	-@rm $(HTML_DOCUMENT) 2> /dev/null
@@ -215,34 +240,43 @@ clean: ## Remove build and temporary files
 
 # FIXME: It doesn't work out of the box
 REVEALJS_SRC ?= https://github.com/hakimel/reveal.js/
-revealjs: $(SOURCE_DOCUMENT) ## Create a revealjs presentation
+revealjs: $(MAIN_SRC) ## Create a revealjs presentation
 	$(ECHO) Creating revealjs presentation...
 	$(ECHO) Gettin revealjs from $(REVEALJS_SRC)
-	git clone --depth=1 $(REVEALJS_SRC) && rm -rf reveal.js/.git
-	$(PANDOC) --mathjax -s -f latex -t revealjs $(SOURCE_DOCUMENT) -o $(HTML_DOCUMENT)
-man: $(SOURCE_DOCUMENT) ## Create a man document
+	$(GIT) clone --depth=1 $(REVEALJS_SRC) && rm -rf reveal.js/.git
+	$(PANDOC) --mathjax -s -f latex -t revealjs $(MAIN_SRC) -o $(HTML_DOCUMENT)
+man: $(MAIN_SRC) ## Create a man document
 	$(ECHO) Creating man pages...
-	$(PANDOC) -s -f latex -t man $(SOURCE_DOCUMENT) -o $(MAN_DOCUMENT)
-html: $(SOURCE_DOCUMENT) ## Create an html5 document
+	$(PANDOC) -s -f latex -t man $(MAIN_SRC) -o $(MAN_DOCUMENT)
+html: $(MAIN_SRC) ## Create an html5 document
 	$(ECHO) Compiling html document...
-	$(PANDOC) --mathjax -s -f latex -t html5 $(SOURCE_DOCUMENT) -o $(HTML_DOCUMENT)
+	$(PANDOC) --mathjax -s -f latex -t html5 $(MAIN_SRC) -o $(HTML_DOCUMENT)
 
 todo: $(INCLUDES_DEP) ## Print the todos from the main document
-	$(ECHO) Parsing \\TODO{} in $(SOURCE_DOCUMENT)
+	$(ECHO) Parsing \\TODO{} in $(MAIN_SRC)
 	@$(SED) -n "/\\TODO{/,/}/\
 	{\
 		s/.TODO/===/; \
 		s/[{]//g; \
 		s/[}]/===/g; \
 		p\
-	}" $(SOURCE_DOCUMENT) $(INCLUDES)
+	}" $(MAIN_SRC) $(INCLUDES)
 
+# ===========================
+# Presenter console generator
+# ===========================
+#
+# pdfpc is a nice program for presenting beamer presentations with notes
+# and a speaker clock. This target implements a simple script to convert
+# the standard \notes{ } beamer  command into pdfpc compatible files, so
+# that you can also see your beamer notes inside the pdfpc program.
+#
 pdf-presenter-console: $(PDFPC_FILE) ## Create annotations file for the pdfpc program
-$(PDFPC_FILE): $(SOURCE_DOCUMENT)
+$(PDFPC_FILE): $(MAIN_SRC)
 	echo "[file]" > $@
 	echo "$(PDF_DOCUMENT)" >> $@
 	echo "[notes]" >> $@
-	cat $(SOURCE_DOCUMENT) | $(AWK) '\
+	cat $(MAIN_SRC) | $(AWK) '\
 		BEGIN { frame = 0; initialized = 0; } \
 		/(\\begin{frame}|\\frame{)/ { \
 			if(!/[%]/) { \
@@ -262,6 +296,16 @@ $(PDFPC_FILE): $(SOURCE_DOCUMENT)
 		END { print frame } \
 	' | tee -a $@
 
+RELEASES_DIR=releases
+RELEASES_FMT=tar
+releases: $(BUILD_DOCUMENT) ## Create all releases (according to tags)
+	$(ECHO) Copying releases to $(RELEASES_DIR) folder in $(RELEASES_FMT) format
+	@mkdir -p $(RELEASES_DIR)
+	@for tag in $$($(GIT) tag); do\
+		echo "Processing $$tag"; \
+		$(GIT) archive --format=$(RELEASES_FMT) --prefix=$$tag/ $$tag > $(RELEASES_DIR)/$$tag.$(RELEASES_FMT); \
+	done
+
 dist: $(BUILD_DOCUMENT) ## Create a dist folder with the bare minimum to compile
 	$(ECHO) "Creating dist folder"
 	@mkdir -p $(DIST_DIR)
@@ -271,32 +315,60 @@ dist: $(BUILD_DOCUMENT) ## Create a dist folder with the bare minimum to compile
 	@cp $(BUILD_DOCUMENT) $(DIST_DIR)/
 	$(ECHO) "Creating folder for dependencies"
 	@echo $(DEPENDENCIES)\
-	 | xargs -n1 dirname\
-	 | xargs -n1 -I FF mkdir -p $(DIST_DIR)/FF
+	 | $(XARGS) -n1 dirname\
+	 | $(XARGS) -n1 -I FF mkdir -p $(DIST_DIR)/FF
 	$(ECHO) "Copying dependencies"
 	@echo $(DEPENDENCIES)\
-	 | tr " " "\n" \
-	 | xargs -n1 -I FF cp FF $(DIST_DIR)/FF
+	 | $(TR) " " "\n" \
+	 | $(XARGS) -n1 -I FF cp FF $(DIST_DIR)/FF
+
+lint: $(INCLUDES_DEP) ## Check syntax of latex sources (TEX_LINTER)
+	$(TEX_LINTER) $(MAIN_SRC) $(INCLUDES)
 
 watch: ## Build if changes
-	(echo $(SOURCE_DOCUMENT) | entr make )&
+	(echo $(MAIN_SRC) | entr make )&
 unwatch: ## Cancel Watching
 	killall entr
 
-test: ## See some make variables for debugging
-	$(ECHO) DEPENDENCIES
-	$(ECHO) ============
-	$(ECHO) $(DEPENDENCIES) | tr " " "\n"
-	@echo $(MAKEFILE_LIST)
+# ===============================
+# Update the makefile from source
+# ===============================
+#
+# You can always get the  last latex-makefile version using this target.
+# You may override the GH_REPO_FILE to  any path where you save your own
+# personal makefile
+#
+GH_REPO_FILE ?= https://raw.githubusercontent.com/alejandrogallo/latex-makefile/master/Makefile
+update: ## Update the makefile from the repository
+	$(ECHO) "Getting makefile from $(GH_REPO_FILE)"
+	wget $(GH_REPO_FILE) -O Makefile
 
-tags: $(SOURCE_DOCUMENT) $(INCLUDES_DEP) ## Create TeX exhuberant ctags
-	ctags --language-force=tex -R *
+test: ## See some make variables for debugging
+	$(ECHO) DEPENDENCIES =
+	@echo $(DEPENDENCIES) | $(TR) " " "\n"
+	$(ECHO) "MAIN_SRC    = $(MAIN_SRC)"
+	$(ECHO) "Makefiles   = $(MAKEFILE_LIST)"
+	$(ECHO) "LINUX       = $(LINUX)"
+	$(ECHO) "OSX         = $(OSX)"
+	$(ECHO) "readlink    = $(READLINK)"
+	$(ECHO) "PDF_VIEWER  = $(PDF_VIEWER)"
+	$(ECHO) "$(call discoverMain)"
+
+# ====================================
+# Ctags generation for latex documents
+# ====================================
+#
+# Generate a tags  file so that you can navigate  through the tags using
+# compatible editors such as emacs or (n)vi(m).
+#
+tags: $(MAIN_SRC) $(INCLUDES_DEP) ## Create TeX exhuberant ctags
+	$(CTAGS) --language-force=tex -R *
 
 purge: clean ## Remove recursively with suffixes in PURGE_SUFFIXES
 	$(ECHO) Purging files across directories... be careful
 	@echo "$(PURGE_SUFFIXES)" \
-	| tr "%" "*" \
-	| xargs -n1  $(FIND) . -name \
+	| $(TR) "%" "*" \
+	| $(XARGS) -n1  $(FIND) . -name \
 	| while read i; do echo $$i ; rm $$i; done
 
 
