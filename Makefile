@@ -78,6 +78,7 @@ $(shell $(WHICH) xdg-open 2> /dev/null),\
 $(shell $(WHICH) open 2> /dev/null),\
 )
 LATEX           ?= pdflatex
+LATEXDIFF       ?= latexdiff
 TEX_LINTER      ?= chktex
 PDFLATEX        ?= pdflatex
 ASYMPTOTE       ?= asy
@@ -181,7 +182,8 @@ force: ## Force creation of BUILD_DOCUMENT
 #
 $(BIBITEM_FILE): $(BIBTEX_FILE)
 	$(ECHO) "Compiling the bibliography"
-	-$(BIBTEX) $(patsubst %.bib,%,$(BIBTEX_FILE)) $(FD_OUTPUT)
+	-cp $< $(BUILD_DIR)
+	cd $(BUILD_DIR); $(BIBTEX) $(patsubst %.bib,%,$(BIBTEX_FILE)) $(FD_OUTPUT)
 	$(ECHO) Compiling again $(BUILD_DOCUMENT) to update refs
 	$(MAKE) force
 
@@ -255,9 +257,6 @@ $(TOC_FILE): $(TOC_DEP)
 	$(ECHO) Creating $(TOC_FILE)
 	@mkdir -p $(BUILD_DIR)
 	cd $(dir $(MAIN_SRC) ) && $(PDFLATEX) -output-directory $(BUILD_DIR) $(notdir $(MAIN_SRC) ) $(FD_OUTPUT)
-ifneq ($(BUILD_DIR),.)
-	mv $(dir $< )/$(BUILD_DIR)/$(notdir $@) $(dir $<)/$(notdir $@)
-endif
 
 $(TOC_DEP): $(MAIN_SRC) $(INCLUDES_DEP)
 	$(ECHO) Parsing the toc entries
@@ -429,6 +428,47 @@ dist: $(BUILD_DOCUMENT) ## Create a dist folder with the bare minimum to compile
 	 | $(TR) " " "\n" \
 	 | $(XARGS) -n1 -I FF cp FF $(DIST_DIR)/FF
 
+DIFF ?=HEAD HEAD~1
+NEW_COMMIT = $(word 1,$(DIFF))
+OLD_COMMIT = $(word 2,$(DIFF))
+DIFF_BUILD_DIR ?= diffs/$(NEW_COMMIT)_$(OLD_COMMIT)
+DIFF_SRC_NAME  ?= diff.tex
+# ====
+# Diff
+# ====
+#
+# This target creates differences between older versions of the main latex file
+# by means of [GIT](https://git-scm.com/). You have to specify the commits that
+# you want to compare by doing
+#
+# ```bash
+# make DIFF="HEAD HEAD~3" diff
+# ```
+# If you want to compare the HEAD commit with the commit three times older than
+# HEAD. You can also provide a *commit hash*. The default value is `HEAD HEAD~1`.
+#
+# The target creates a distribution folder located in the variable
+# DIFF_BUILD_DIR. *Warning*: It only works for single document tex projects.
+diff: ## Create a latexdiff using git versions
+	$(ECHO) Creating diff between $(NEW_COMMIT) and $(OLD_COMMIT)
+	mkdir -p $(DIFF_BUILD_DIR)
+	git checkout $(NEW_COMMIT) $(MAIN_SRC)
+	cp $(MAIN_SRC) $(DIFF_BUILD_DIR)/$(strip $(MAIN_SRC)).$(NEW_COMMIT)
+	git checkout $(OLD_COMMIT) $(MAIN_SRC)
+	cp $(MAIN_SRC) $(DIFF_BUILD_DIR)/$(strip $(MAIN_SRC)).$(OLD_COMMIT)
+	$(LATEXDIFF) \
+		$(DIFF_BUILD_DIR)/$(strip $(MAIN_SRC)).$(OLD_COMMIT) \
+		$(DIFF_BUILD_DIR)/$(strip $(MAIN_SRC)).$(NEW_COMMIT) \
+		> $(DIFF_SRC_NAME)
+	$(MAKE) \
+		BUILD_DIR=$(DIFF_BUILD_DIR) \
+		MAIN_SRC=$(DIFF_SRC_NAME) \
+		DIST_DIR=$(DIFF_BUILD_DIR) \
+		dist
+	rm $(DIFF_SRC_NAME) $(patsubst %.tex,%.pdf,$(DIFF_SRC_NAME))
+	git checkout HEAD $(MAIN_SRC)
+
+
 # ============
 # Check syntax
 # ============
@@ -517,7 +557,7 @@ help: ## Prints help for targets with comments
 
 ## <<HELP
 #
-# v1.0.0
+# v1.1.0
 # https://github.com/alejandrogallo/latex-makefile
 # By Alejandro Gallo
 #
