@@ -611,6 +611,22 @@
   \end{center}
 \end{frame}
 
+\begin{frame}{Strain dependence of energy: $ \mathrm{NV}^{-} $ 216 cell}
+  \centering
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=1\textwidth]{images/strain/vasp-216-normal-relaxed.pdf}\\
+      \includegraphics[width=0.2\textwidth]{images/strain/normal-strain.pdf}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=1\textwidth]{images/strain/vasp-216-shear-relaxed.pdf}\\
+      \includegraphics[width=0.2\textwidth]{images/strain/shear-strain.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
 \def\triplet{
   \raisebox{-3.4mm}{
     \boxed{
@@ -717,28 +733,15 @@
     \item Structural properties
     \item ZPL (Zero Phonon Line) calculation.
     \item ZFS (Zero Field Splitting) tensor calculation.
+    \item DMRG for excited state calculations of the $ \mathrm{NV}^{-} $ center.
     \item \textbf{Beyond the Ground state:}\\
-      Using DMRG (\textit{Density Matrix Renormalization Group}) for excited state calculations
+      \begin{itemize}
+        \item DMRG for different $ \mathrm{XV}^{c}_{a} $ centers.
+        \item \textit{Coupled Cluster} methods.
+      \end{itemize}
   \end{itemize}
 \end{frame}
 
-
-%\begin{frame}{Using DMRG for excited state calculations}
-  %\begin{columns}
-    %\begin{column}{0.5\textwidth}
-      %\begin{itemize}
-        %\item $ \mathsf{XV}^{q} $ as molecules.
-        %\item Localized states as isolated.
-        %\item Issues like charge transfer, charge corrections.
-      %\end{itemize}
-    %\end{column}
-    %\begin{column}{0.5\textwidth}
-      %\centering
-      %\textit{ $ \mathsf{NV}^{+} $ }
-      %\includegraphics[clip, trim=2cm 0 2cm 0, width=1.0\textwidth]{images/nv_plus_orbitals_example.png}
-    %\end{column}
-  %\end{columns}
-%\end{frame}
 
 
 \plain{Thank you!}
