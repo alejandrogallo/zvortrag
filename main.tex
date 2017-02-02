@@ -611,23 +611,99 @@
   \end{center}
 \end{frame}
 
+\def\triplet{
+  \raisebox{-3.4mm}{
+    \boxed{
+      \includegraphics[width=1cm]{images/dmrg/triplet.pdf}
+    }
+  }
+}
 
-  
-%\begin{frame}{Ground state example: $ \mathsf{GeV}^{-} $ }
-  %\begin{center}
-    %\begin{columns}
-      %\begin{column}{0.3\textwidth}
-        %\includegraphics[height=1\textheight]{images/lumos/Ge_minus_cubic_128_dmatrix_encut_lumos.pdf}
-      %\end{column}
-      %\begin{column}{0.3\textwidth}
-        %\includegraphics[height=1\textheight]{images/lumos/Ge_minus_hexagonal_z_128_dmatrix_encut_lumos.pdf}
-      %\end{column}
-      %\begin{column}{0.3\textwidth}
-        %\includegraphics[height=1\textheight]{images/lumos/Ge_minus_hexagonal_x_128_dmatrix_encut_lumos.pdf}
-      %\end{column}
-    %\end{columns}
-  %\end{center}
-%\end{frame}
+\def\tripletTwo{
+  \raisebox{-3.4mm}{
+    \boxed{
+      \includegraphics[width=1cm]{images/dmrg/triplet_2.pdf}
+    }
+  }
+}
+
+\begin{frame}{DMRG: Density Matrix Renormalization Group}
+  \centering
+  \visible<1->{
+    \textbf{DFT}/\textbf{HF}
+  }
+  \visible<2->{
+    $ \quad \Rightarrow \quad $
+    $ \triplet $
+  }
+  \visible<3->{
+    $ \quad \Rightarrow \quad $
+    $ \ket{\Phi } =
+     \ket \triplet $
+  }
+  \visible<4->{
+    \begin{center}
+      Only one slater determinant?
+    \end{center}
+  }
+  \visible<5->{
+    $
+      \ket{\Phi} =
+      c_{1} \ket{\triplet} +
+      c_{2} \ket{\tripletTwo} +
+      \ldots ?
+    $
+  }
+  \visible<6->{
+    \begin{center}
+      We may be missing part of the information \ldots
+    \end{center}
+  }
+\end{frame}
+
+\begin{frame}{DMRG: Density Matrix Renormalization Group}
+  \centering
+  %
+  %
+  \[
+  \ket{\Phi} = \sum^{}_{I} c_{I} \ket{I}, \qquad \mbox{ $ I $ is a configuration}
+  \]
+  %
+  %
+  \visible<2->{
+    $ c_{I} $ explode with the number of orbitals.
+  }
+  \visible<3->{
+    Ansatz?
+  }
+  \visible<4->{
+    $$
+    c_{I} =
+    \sum^{}_{i_{1}, i_{2}, \ldots, i_{k-1}}
+    \mathbf{M}^{n_{1}}_{i_{1}}
+    \mathbf{M}^{n_{2}}_{i_{1}i_{2}}
+    \mathbf{M}^{n_{3}}_{i_{2}i_{3}}
+    \cdots
+    \mathbf{M}^{n_{k-1}}_{i_{k-2}i_{k-1}}
+    \mathbf{M}^{n_{k}}_{i_{k-1}}
+    $$
+  }
+  \visible<4->{
+    $ \mathbf{M}_{ij} $ are matrices of dimension $ M $. $ k $ is the total number of orbitals and
+    $ n_{k}(I) $ the occupation of the configuration $ I $ for the state $ k $.
+  }
+\end{frame}
+
+\begin{frame}{DMRG: Results}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \includegraphics[width=1.2\textwidth]{images/basic_levels.pdf}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \includegraphics[width=1\textwidth, trim=500 200 190 200, clip]{images/dmrg_results.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
 
 
 
