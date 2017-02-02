@@ -434,9 +434,17 @@
 \begin{frame}{Defect hexagonal diamond}
   \begin{center}
     \begin{tabular}{cr}
-      Cubic diamond   & \includegraphics[width=0.4\textwidth]{images/POSCAR_16_view.png}\\
-      Hexagonal $ x $-type &\includegraphics[width=0.4\textwidth]{images/POSCAR_16_x_view.png}\\
-      Hexagonal $ z $-type & \includegraphics[width=0.4\textwidth]{images/POSCAR_16_z_view.png}
+      \raisebox{1cm}{Cubic diamond}   & \includegraphics[width=0.4\textwidth]{images/POSCAR_16_view.png}\\
+      \raisebox{1cm}{Hexagonal $ x $-type }
+      &
+      \only<1>{
+        \includegraphics[width=0.4\textwidth]{images/POSCAR_16_x_view.png}
+      }
+      \only<2>{
+        \includegraphics[width=0.4\textwidth]{images/hexagonal_view_above.pdf}
+      }
+      \\
+      \raisebox{1cm}{Hexagonal $ z $-type } & \includegraphics[width=0.4\textwidth]{images/POSCAR_16_z_view.png}
     \end{tabular}
   \end{center}
 \end{frame}
