@@ -138,6 +138,85 @@
 
 \section{Introduction} %{{{1
 
+\begin{frame}{Ab initio}
+  \begin{center}
+    Ab initio $ \equiv $ From first principles (only $ \hat{H} $)
+  \end{center}
+  \visible<2->{
+    \begin{center}
+      Maxwell equations
+      $ \Rightarrow $
+      $ \mathbf{E}(x,y,z), \mathbf{B}(x,y,z) $
+    \end{center}
+  }
+  \visible<3->{
+    \begin{center}
+      $ \hat{H}_{N^{2}} $
+      \visible<4->{
+        $ \Rightarrow  $
+        7+7 $ e^{-} $
+      }
+      \visible<5->{
+        $ \Rightarrow  $
+        $
+        \Psi (\mathbf{r}_{1}, \ldots, \mathbf{r}_{14}) \quad \mathbf{r}_{i} =
+        (x_{i}, y_{i}, z_{i})
+        $, \\
+      }
+    \end{center}
+    \visible<6->{
+      Store 4 points per coordinate (4-grid)
+      $ \Rightarrow $
+      \[
+        4^{3\cdot 14}\ \mathrm{pts}
+        \times
+        \frac{64}{8}
+        \frac{\mathrm{B}}{\mathrm{pts}}
+        \times
+        \frac{1}{2^{30}}
+        \frac{\mathrm{GB}}{\mathrm{B}}
+        \times
+        \frac{1}{10}
+        \frac{\mathrm{DVD}}{\mathrm{GB}}
+        \times
+        \frac{1}{10^{6}}
+        \frac{\mathrm{km}}{\mathrm{DVD}}
+        \approx
+        288 L_{\mathrm{earth} - \mathrm{mars}}
+      \]
+    }
+  }
+\end{frame}
+
+\begin{frame}{Density functional theory (DFT)}
+  \textit{``$ \it \Psi  $  contains too much information''}
+  \hfill \textit{- Popular saying}
+  \begin{itemize}
+    \item In principle, DFT delivers the \textbf{exact ground state properties}.
+    %\item The exact electronic ground state of a system is only dependent on
+      %the electronic density $ \rho $ .
+
+    \item All quantities are written in terms of $ \rho $ (functional formalism).
+    \item E.g.:
+      \begin{align*}
+        &E[ \rho ] =\\
+        &T_{s} [ \rho  ]
+        +
+        \int  V ( \mathbf{r} ) \rho ( \mathbf{r} ) \ \mathrm{d} \mathbf{r}
+        +
+        \frac{1}{4\pi \epsilon _{0}}
+        \int
+        \frac{\rho ( \mathbf{r} ) \rho ( \mathbf{r}' )}{| \mathbf{r} - \mathbf{r}'|}
+        \ \mathrm{d} \mathbf{r}\mathrm{d} \mathbf{r}'
+        +
+        E^{ \mathrm{exact}}_{ \mathrm{xc}} [ \rho, \nabla \rho  ]
+      \end{align*}
+      The exchange correlation potential
+      $ E^{ \mathrm{exact}}_{ \mathrm{xc}} [ \rho , \nabla \rho  ] $
+      determines the DFT \textit{flavor}.
+      In many calculations we use the so-called \textbf{PBE} \textit{(Perdew-Burke-Ernzerhof)} functional.
+  \end{itemize}
+\end{frame}
 
 \begin{frame}{Nitrogen Vacancy Centre in diamond (NV center)}
   \begin{center}
@@ -388,35 +467,7 @@
 
 \end{frame}
 
-\begin{frame}{Density functional theory (DFT)}
-  \textit{``$ \it \Psi  $  contains too much information''}
-  \hfill \textit{- Popular saying}
-  \begin{itemize}
-    \item In principle, DFT delivers the \textbf{exact ground state properties}.
-    %\item The exact electronic ground state of a system is only dependent on
-      %the electronic density $ \rho $ .
 
-    \item All quantities are written in terms of $ \rho $ (functional formalism).
-    \item E.g.:
-      \begin{align*}
-        &E[ \rho ] =\\
-        &T_{s} [ \rho  ]
-        +
-        \int  V ( \mathbf{r} ) \rho ( \mathbf{r} ) \ \mathrm{d} \mathbf{r}
-        +
-        \frac{1}{4\pi \epsilon _{0}}
-        \int
-        \frac{\rho ( \mathbf{r} ) \rho ( \mathbf{r}' )}{| \mathbf{r} - \mathbf{r}'|}
-        \ \mathrm{d} \mathbf{r}\mathrm{d} \mathbf{r}'
-        +
-        E^{ \mathrm{exact}}_{ \mathrm{xc}} [ \rho, \nabla \rho  ]
-      \end{align*}
-      The exchange correlation potential
-      $ E^{ \mathrm{exact}}_{ \mathrm{xc}} [ \rho , \nabla \rho  ] $
-      determines the DFT \textit{flavor}.
-      In many calculations we use the so-called \textbf{PBE} \textit{(Perdew-Burke-Ernzerhof)} functional.
-  \end{itemize}
-\end{frame}
 
 
 
