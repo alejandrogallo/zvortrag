@@ -1,2 +1,2 @@
 BUILD_DIR = build
-CHECK_SPELL = 1
+CHECK_SPELL =
