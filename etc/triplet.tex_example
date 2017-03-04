@@ -1,0 +1,77 @@
+\documentclass{article}
+\usepackage{tikz}
+%%%<
+\usepackage{verbatim}
+\usepackage[active,tightpage]{preview}
+\PreviewEnvironment{center}
+\setlength\PreviewBorder{00pt}%
+%%%>
+
+
+\usetikzlibrary{calc,arrows,shapes,positioning,decorations.pathmorphing,intersections}
+\usepackage{sansmath}
+\begin{document}
+
+  \sansmath
+
+  \begin{preview}
+      \begin{tikzpicture}[
+    level/.style={black,very thick, line width=1.5mm},
+    spin/.style={red,line width=2.5mm,->,shorten >=4pt,>=stealth},
+    annotation/.style={red,thick,<->,shorten >=4pt,shorten <=4pt,>=stealth}
+  ]
+  \tikzstyle{every node}=[font=\Huge]
+
+  %  Main defs {{{1  %
+  %%%%%%%%%%%%%%%%%%
+  \pgfmathsetmacro{\levelwidth}{4}
+  \pgfmathsetmacro{\levelSeparation}{2}
+  \pgfmathsetmacro{\arrowHeight}{2}
+
+  % This command defines automatically the variable "alphaVarName", for example
+  % \alpha{g} defines the point alphag, which is located at the middle of the
+  % spin arrow
+  \newcommand{\alphae}[2][]{% Alpha electron
+    \draw[spin,#1] ($(#2)+(\levelwidth/3,-0.5*\arrowHeight)$)
+      -- +(0,\arrowHeight)
+      node[midway] (alpha#2) {};
+  }
+  \newcommand{\betae}[2][]{% beta electron
+    \draw[spin,<-,#1] ($(#2)+(2*\levelwidth/3,-0.5*\arrowHeight)$)
+      -- +(0,\arrowHeight)
+      node[midway] (beta#2) {};
+  }
+
+  % Define orbitals
+  \node (a) {};
+  \node[above=\levelSeparation of a] (b) {};
+  \node[above=\levelSeparation of b] (c) {};
+  \node[above=\levelSeparation of c] (d) {};
+
+  % Draw orbitals
+  \draw[level] (a) -- +(\levelwidth,0);
+  \draw[level] (b) -- +(\levelwidth,0);
+  \draw[level] (c) -- +(\levelwidth,0);
+  \draw[level] (d) -- +(\levelwidth,0);
+
+  % Draw electrons
+  \alphae[blue]{a}
+  \betae{b}
+  \alphae[red]{d}
+  \betae{d}
+  \alphae[red]{c}
+  \betae{c}
+
+  \draw[thick, line width=1mm, <->] (alphaa) -- (betab);
+
+
+
+
+
+
+    \end{tikzpicture}
+  \end{preview}
+
+
+\end{document}
+% vim:spell ft=tex spell!
