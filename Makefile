@@ -1,6 +1,6 @@
 
-MAKEFILE_VERSION = v1.5.1
-MAKEFILE_DATE = 13-02-2017 10:35
+MAKEFILE_VERSION = v1.5.5
+MAKEFILE_DATE = 03-03-2017 00:33
 
 ## <<HELP
 #
@@ -50,6 +50,8 @@ PY         ?= python
 PYTHONTEX  ?= pythontex
 # Grep program version
 GREP       ?= grep
+# Find utility
+FIND       ?= find
 # sed program version
 SED        ?= $(if $(OSX),gsed,sed)
 AWK        ?= $(if $(OSX),gawk,awk)
@@ -90,25 +92,56 @@ ARROW           := @ > /dev/null echo
 ECHO            := @ > /dev/null echo
 endif #QQUIET
 
-# Function to try to discover automatically
-# the main latex document
-discoverMain = $(shell \
-                   $(GREP) -H '\\begin{document}' *.tex 2>/dev/null \
-                   | head -1 \
-                   | $(AWK) -F ":" '{print $$1}')
+# Function to try to discover automatically the main latex document
+define discoverMain
+$(shell \
+	$(GREP) -H '\\begin{document}' *.tex 2>/dev/null \
+	| head -1 \
+	| $(AWK) -F ":" '{print $$1}' \
+)
+endef
 
-hasToc = $(shell\
-             $(GREP) '\\tableofcontents' $(1))
+define discoverBibtexFiles
+$(shell \
+	$(GREP) -E '\\bibliography\s*{' $(1) 2> /dev/null  \
+		| $(SED) 's/.*\\bibliography//' \
+		| $(SED) 's/\.bib//g' \
+		| $(TR) "," "\n" \
+		| $(TR) -d "{}" \
+		| $(SED) 's/\s*$$/.bib /' \
+		| sort \
+		| uniq \
+)
+endef
 
-# Man texfile in the current directory
+define recursiveDiscoverIncludes
+$(shell \
+	files=$(1);\
+	for i in $$(seq 1 $(2)); do \
+		files="$$(\
+			$(SED) -n "/^\s*[^%].*\in\(clude\|put\)[^a-z]/p" $$files 2>/dev/null \
+					| $(SED) 's/\.tex//g' \
+					| $(SED) 's/.*{\(.*\)}.*/\1.tex /' \
+		)"; \
+		test -n "$$files" || break; \
+		echo $$files; \
+	done \
+)
+endef
+
+define hasToc
+$(shell\
+	$(GREP) '\\tableofcontents' $(1)\
+)
+endef
+
+# Main texfile in the current directory
 MAIN_SRC        ?= $(call discoverMain)
 # Format to build to
 FMT             ?= pdf
-# Bibtex files in the current directory
-BIBTEX_FILE     ?= $(wildcard *.bib)
 # Folder to keep makefile dependencies
 DEPS_DIR        ?= .deps
-# If pdf should be previewed after building
+# If `pdf` should be previewed after building
 VIEW            ?= 1
 # General dependencies for BUILD_DOCUMENT
 DEPENDENCIES    ?=
@@ -116,8 +149,14 @@ DEPENDENCIES    ?=
 CLEAN_FILES     ?=
 # Figures included in all texfiles
 FIGURES         ?=
+# Depth for discovering automatically included texfiles
+INCLUDES_REC    ?= 3
 # Texfiles included in the main tex file
-INCLUDES        ?=
+INCLUDES        ?= $(call recursiveDiscoverIncludes,$(MAIN_SRC),$(INCLUDES_REC))
+# All `texfiles` in the project
+TEXFILES        ?= $(MAIN_SRC) $(INCLUDES)
+# Bibtex files in the current directory
+BIBTEX_FILES     ?= $(call discoverBibtexFiles,$(TEXFILES))
 # If pythontex is being used
 WITH_PYTHONTEX  ?=
 # If secondary programs output is shown
@@ -126,9 +165,9 @@ QUIET           ?= 0
 PREFIX          ?= $(PWD)
 # Folder to build the project
 BUILD_DIR       ?= .
-# Build dir flag for latex
-# If BUILD_DIR = . then BUILD_DIR_FLAG = is not defined
-# else BUILD_DIR = -output-directory $(BUILD_DIR)
+# Build dir flag for latex.
+# If `BUILD_DIR = .` then `BUILD_DIR_FLAG` is not defined,
+# else `BUILD_DIR = -output-directory $(BUILD_DIR)`
 BUILD_DIR_FLAG  ?= $(if \
                    $(filter-out \
                    .,$(strip $(BUILD_DIR))),-output-directory $(BUILD_DIR))
@@ -169,7 +208,7 @@ ifneq ($(strip $(MAIN_SRC)),) # Do this only if MAIN_SRC is defined
 
 BUILD_DOCUMENT       = $(patsubst %.tex,%.$(FMT),$(MAIN_SRC))
 TOC_FILE             = $(patsubst %.tex,$(BUILD_DIR)/%.toc,$(MAIN_SRC))
-BIBITEM_FILE         = $(patsubst %.tex,$(BUILD_DIR)/%.bbl,$(MAIN_SRC))
+BIBITEM_FILES        = $(patsubst %.tex,$(BUILD_DIR)/%.bbl,$(MAIN_SRC))
 AUX_FILE             = $(patsubst %.tex,$(BUILD_DIR)/%.aux,$(MAIN_SRC))
 PYTHONTEX_FILE       = $(patsubst %.tex,$(BUILD_DIR)/%.pytxcode,$(MAIN_SRC))
 PDFPC_FILE           = $(patsubst %.tex,%.pdfpc,$(MAIN_SRC))
@@ -184,12 +223,10 @@ SUPPORTED_SUFFIXES   = %.pdf %.div %.ps %.eps %.1 %.html
 # includes, table of contents generation or figure recognition
 #
 TOC_DEP        = $(strip $(DEPS_DIR))/toc.d
-INCLUDES_DEP   = $(strip $(DEPS_DIR))/includes.d
 FIGS_DEP       = $(strip $(DEPS_DIR))/figs.d
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),help)
--include $(INCLUDES_DEP)
 -include $(FIGS_DEP)
 endif
 endif
@@ -208,7 +245,7 @@ $(INCLUDES) \
 $(PACKAGES_FILES_BUILD) \
 $(FIGURES) \
 $(if $(call hasToc,$(MAIN_SRC)),$(TOC_FILE),$(AUX_FILE)) \
-$(if $(wildcard $(BIBTEX_FILE)),$(BIBITEM_FILE)) \
+$(if $(wildcard $(BIBTEX_FILES)),$(BIBITEM_FILES)) \
 $(if $(WITH_PYTHONTEX),$(PYTHONTEX_FILE)) \
 $(if $(CHECK_SPELL),spelling) \
 
@@ -229,7 +266,7 @@ $(if $(filter-out .,$(strip $(BUILD_DIR))),$(wildcard $(BUILD_DIR))) \
 
 
 
-.PHONY: view-pdf open-pdf $(PDF_VIEWER) todo help test force purge dist releases
+.PHONY: view-pdf open-pdf $(PDF_VIEWER) todo help test force dist releases
 
 pdf: FMT=pdf ## Create pdf file
 html: FMT=html ## Create html file
@@ -237,7 +274,7 @@ revealjs: FMT=html  ## Create a revealjs presentation
 man: FMT=1 ## Create man file
 $(FMT): $(BUILD_DOCUMENT)
 
-deps: $(INCLUDES_DEP) $(FIGS_DEP) ## Parse dependencies for the main texfile
+deps: $(FIGS_DEP) ## Parse dependencies for the main texfile
 
 all: $(FMT) $(if $(VIEW),view-$(FMT)) ## (Default) Create BUILD_DOCUMENT
 
@@ -273,9 +310,14 @@ force: ## Force creation of BUILD_DOCUMENT
 # file, this  will also be  targeted, bit  the '-' before  the `$(BIBTEX)`
 # ensures that the whole building doesn't fail because of it
 #
-$(BIBITEM_FILE): $(BIBTEX_FILE)
+$(BIBITEM_FILES): $(BIBTEX_FILES)
 	$(ARROW) "Compiling the bibliography"
-	-$(DEBUG)test $(BUILD_DIR) = . || cp $^ $(BUILD_DIR)/
+	-$(DEBUG)test $(BUILD_DIR) = . || { \
+		for bibfile in $(BIBTEX_FILES); do \
+			mkdir -p $(BUILD_DIR)/$$(dirname $$bibfile); \
+			cp -u $$bibfile $(BUILD_DIR)/$$(dirname $$bibfile); \
+		done \
+		}
 	$(DEBUG)cd $(BUILD_DIR); $(BIBTEX) $(patsubst %.tex,%,$(MAIN_SRC)) $(FD_OUTPUT)
 	$(ARROW) Compiling again $(BUILD_DOCUMENT) to update refs
 	$(DEBUG)$(MAKE) --no-print-directory force
@@ -339,9 +381,17 @@ $(FIGS_SUFFIXES): %.sh
 	$(ARROW) Compiling $<
 	$(DEBUG)cd $(dir $< ) && $(SH) $(notdir $< ) $(FD_OUTPUT)
 
+%.tex: %.sh
+	$(ARROW) Creating $@ from $<
+	$(DEBUG)cd $(dir $<) && $(SH) $(notdir $<) $(FD_OUTPUT)
+
 $(FIGS_SUFFIXES): %.py
 	$(ARROW) Compiling $<
 	$(DEBUG)cd $(dir $< ) && $(PY) $(notdir $< ) $(FD_OUTPUT)
+
+%.tex: %.py
+	$(ARROW) Creating $@ from $<
+	$(DEBUG)cd $(dir $<) && $(PY) $(notdir $<) $(FD_OUTPUT)
 
 $(FIGS_SUFFIXES): %.tex
 	$(ARROW) Compiling $< into $@
@@ -359,29 +409,20 @@ $(TOC_FILE): $(TOC_DEP)
 	$(DEBUG)cd $(dir $(MAIN_SRC) ) && $(PDFLATEX) \
 		$(BUILD_DIR_FLAG) $(notdir $(MAIN_SRC) ) $(FD_OUTPUT)
 
-$(TOC_DEP): $(MAIN_SRC) $(INCLUDES_DEP)
+$(TOC_DEP): $(TEXFILES)
 	$(ARROW) Parsing the toc entries
 	$(DEBUG)mkdir -p $(dir $@)
 	$(DEBUG)$(GREP) -E \
 		'\\(section|subsection|subsubsection|chapter|part|subsubsubsection).' \
-		$(MAIN_SRC) $(INCLUDES)  \
+		$(TEXFILES)  \
 		| $(SED) 's/.*{\(.*\)}.*/\1/' > $@.control
 	$(DEBUG)if ! diff $@ $@.control 2>&1 > /dev/null ; then mv $@.control $@; fi
 
-$(INCLUDES_DEP): $(MAIN_SRC)
-	$(ARROW) Parsing the includes dependencies
-	$(DEBUG)mkdir -p $(dir $@)
-	$(DEBUG)echo INCLUDES = \\ > $@
-#@ Include statements should not have a .tex extension
-#@ so we are forced to add it
-	$(DEBUG)$(GREP) -E '\\(include|input)[^gp]' $<  \
-	| $(SED) 's/.*{\(.*\)}.*/\1.tex \\/' >> $@
-
-$(FIGS_DEP): $(MAIN_SRC) $(INCLUDES_DEP)
+$(FIGS_DEP): $(TEXFILES)
 	$(ARROW) Parsing the graphics dependencies
 	$(DEBUG)mkdir -p $(dir $@)
 	$(DEBUG)echo FIGURES = \\ > $@
-	$(DEBUG)$(GREP) -E '\\include(graphic|pdf).' $(MAIN_SRC) $(INCLUDES)  \
+	$(DEBUG)$(GREP) -E '\\include(graphic|pdf).' $(TEXFILES)  \
 	| $(GREP) -v "%" \
 	| $(SED) 's/.*{\(.*\)}.*/\1 \\/' >> $@
 
@@ -410,12 +451,12 @@ clean: ## Remove build and temporary files
 # This creates a revealjs presentation using the the pandoc program stored in
 # the make variable PANDOC.
 #
-REVEALJS_SRC ?= https://github.com/hakimel/reveal.js/
 revealjs: $(MAIN_SRC)
 	$(ARROW) Creating revealjs presentation...
 	$(ARROW) Gettin revealjs from $(REVEALJS_SRC)
 	$(GIT) clone --depth=1 $(REVEALJS_SRC) && rm -rf reveal.js/.git
 	$(PANDOC) --mathjax -s -f latex -t revealjs $(MAIN_SRC) -o $(BUILD_DOCUMENT)
+REVEALJS_SRC ?= https://github.com/hakimel/reveal.js/
 
 # =================
 # Unix man document
@@ -437,7 +478,7 @@ html: $(MAIN_SRC)
 	$(ARROW) Compiling html document...
 	$(PANDOC) --mathjax -s -f latex -t html5 $(MAIN_SRC) -o $(BUILD_DOCUMENT)
 
-todo: $(INCLUDES_DEP) ## Print the todos from the main document
+todo: $(TEXFILES) ## Print the todos from the main document
 	$(ARROW) Parsing \\TODO{} in $(MAIN_SRC)
 	$(DEBUG)$(SED) -n "/\\TODO{/,/}/\
 	{\
@@ -445,7 +486,7 @@ todo: $(INCLUDES_DEP) ## Print the todos from the main document
 		s/[{]//g; \
 		s/[}]/===/g; \
 		p\
-	}" $(MAIN_SRC) $(INCLUDES)
+	}" $(TEXFILES)
 
 # ===========================
 # Presenter console generator
@@ -457,7 +498,7 @@ todo: $(INCLUDES_DEP) ## Print the todos from the main document
 # that you can also see your beamer notes inside the `pdfpc` program.
 #
 pdf-presenter-console: $(PDFPC_FILE) ## Create annotations file for the pdfpc program
-$(PDFPC_FILE): $(MAIN_SRC)
+$(PDFPC_FILE): $(TEXFILES)
 	echo "[file]" > $@
 	echo "$(PDF_DOCUMENT)" >> $@
 	echo "[notes]" >> $@
@@ -509,8 +550,11 @@ dist: $(BUILD_DOCUMENT) ## Create a dist folder with the bare minimum to compile
 	$(ARROW) "Copying the target document"
 	$(DEBUG)cp $(BUILD_DOCUMENT) $(DIST_DIR)/
 	$(ARROW) "Copying .bib files"
-	$(DEBUG)test -n "$(BIBTEX_FILE)" && {\
-		cp $(BIBTEX_FILE) $(DIST_DIR)/; \
+	$(DEBUG)test -n "$(BIBTEX_FILES)" && {\
+		for bibfile in $(BIBTEX_FILES); do \
+			mkdir -p $(DIST_DIR)/$$(dirname $$bibfile); \
+			cp -u $$bibfile $(DIST_DIR)/$$(dirname $$bibfile); \
+		done \
 		} || echo "No bibfiles"
 	$(ARROW) "Creating folder for dependencies"
 	$(DEBUG)echo $(DEPENDENCIES)\
@@ -519,7 +563,7 @@ dist: $(BUILD_DOCUMENT) ## Create a dist folder with the bare minimum to compile
 	$(ARROW) "Copying dependencies"
 	$(DEBUG)echo $(DEPENDENCIES)\
 		| $(TR) " " "\n" \
-		| $(XARGS) -n1 -I FF cp FF $(DIST_DIR)/FF
+		| $(XARGS) -n1 -I FF cp -r FF $(DIST_DIR)/FF
 	$(ARROW) "Creating folder for latex libraries"
 	$(DEBUG)test -n "$(PACKAGES_FILES)" && echo $(PACKAGES_FILES)\
 		| $(XARGS) -n1 dirname\
@@ -581,7 +625,7 @@ diff: ## Create a latexdiff using git versions
 # ```
 # if you happen to write in french.
 #
-spelling: $(MAIN_SRC) $(INCLUDES) ## Check spelling of latex sources
+spelling: $(TEXFILES) ## Check spelling of latex sources
 	$(ARROW) Checking the spelling in $(SPELL_LANG)
 	$(DEBUG)mkdir -p $(SPELL_DIR)
 	$(DEBUG)for file in $?; do \
@@ -596,11 +640,11 @@ spelling: $(MAIN_SRC) $(INCLUDES) ## Check spelling of latex sources
 # It checks the syntax (lints) of all the tex sources using the program in the
 # TEX_LINTER variable.
 #
-lint: $(INCLUDES_DEP) ## Check syntax of latex sources (TEX_LINTER)
-	$(TEX_LINTER) $(MAIN_SRC) $(INCLUDES)
+lint: $(TEXFILES) ## Check syntax of latex sources (TEX_LINTER)
+	$(TEX_LINTER) $(TEXFILES)
 
 watch: ## Build if changes
-	(echo $(MAIN_SRC) | entr make )&
+	(echo $(TEXFILES) $(BIBTEX_FILES) | $(TR) " " "\n" | entr make &)&
 unwatch: ## Cancel Watching
 	killall entr
 
@@ -612,10 +656,10 @@ unwatch: ## Cancel Watching
 # You may override the `GH_REPO_FILE` to  any path where you save your own
 # personal makefile
 #
-GH_REPO_FILE ?= https://raw.githubusercontent.com/alejandrogallo/latex-makefile/master/dist/Makefile
 update: ## Update the makefile from the repository
 	$(ARROW) "Getting makefile from $(GH_REPO_FILE)"
 	$(DEBUG)wget $(GH_REPO_FILE) -O Makefile
+GH_REPO_FILE ?= https://raw.githubusercontent.com/alejandrogallo/latex-makefile/master/dist/Makefile
 
 # ====================================
 # Ctags generation for latex documents
@@ -624,15 +668,8 @@ update: ## Update the makefile from the repository
 # Generate a tags  file so that you can navigate  through the tags using
 # compatible editors such as emacs or (n)vi(m).
 #
-tags: $(MAIN_SRC) $(INCLUDES_DEP) ## Create TeX exhuberant ctags
+tags: $(TEXFILES) ## Create TeX exhuberant ctags
 	$(CTAGS) --language-force=tex -R *
-
-purge: clean ## Remove recursively with suffixes in PURGE_SUFFIXES
-	$(ARROW) Purging files across directories... be careful
-	$(DEBUG)echo "$(PURGE_SUFFIXES)" \
-	| $(TR) "%" "*" \
-	| $(XARGS) -n1  $(FIND) . -name \
-	| while read i; do echo $$i ; rm $$i; done
 
 # This is used for printing defined variables from Some other scripts. For
 # instance if you want to know the value of the PDF_VIEWER defined in the
