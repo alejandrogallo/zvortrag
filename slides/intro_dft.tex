@@ -1,0 +1,30 @@
+\begin{frame}{Density functional theory (DFT)} %{{{1
+  \textit{``$ \it \Psi  $  contains too much information''}
+  \hfill \textit{- Popular saying}
+  \begin{itemize}
+    \item In principle, DFT delivers the \textbf{exact ground state properties}.
+    %\item The exact electronic ground state of a system is only dependent on
+      %the electronic density $ \rho $ .
+
+    \item All quantities are written in terms of $ \rho $ (functional formalism).
+    \item E.g.:
+      \begin{align*}
+        &E[ \rho ] =\\
+        &T_{s} [ \rho  ]
+        +
+        \int  V ( \mathbf{r} ) \rho ( \mathbf{r} ) \ \mathrm{d} \mathbf{r}
+        +
+        \frac{1}{4\pi \epsilon _{0}}
+        \int
+        \frac{\rho ( \mathbf{r} ) \rho ( \mathbf{r}' )}{| \mathbf{r} - \mathbf{r}'|}
+        \ \mathrm{d} \mathbf{r}\mathrm{d} \mathbf{r}'
+        +
+        E^{ \mathrm{exact}}_{ \mathrm{xc}} [ \rho, \nabla \rho  ]
+      \end{align*}
+      The exchange correlation potential
+      $ E^{ \mathrm{exact}}_{ \mathrm{xc}} [ \rho , \nabla \rho  ] $
+      determines the DFT \textit{flavor}.
+      In many calculations we use the so-called \textbf{PBE} \textit{(Perdew-Burke-Ernzerhof)} functional.
+  \end{itemize}
+\end{frame}
+
