@@ -1,0 +1,30 @@
+  \pgfmathsetmacro{\levelwidth}{4}
+
+  % Triplet levels
+  \coordinate (A2) at (0, -1);
+  \coordinate (E3) at (0, 6);
+  % Draw main levels
+  \draw[level] (E3) node[left=20pt] {$^3E$}
+       -- +(\levelwidth, 0);
+  \draw[level] (A2) node[left=20pt] {$^3A_2$}
+       -- +(\levelwidth, 0);
+
+  \draw[annotation] (A2) -- (E3);
+
+  \node at (2, 6.5) {Triplet states};
+
+  % Singlet levels
+  \coordinate (E1) at (5, 1);
+  \coordinate (A1) at (5, 4);
+
+  %% Draw main levels
+  \draw[level] (E1) -- +(0.5*\levelwidth, 0)
+    node[right=20pt] {$^1E_{1}$};
+  \draw[level] (A1) -- +(0.5*\levelwidth, 0)
+    node[right=20pt] {$^1A_{1}$};
+
+  \draw[annotation] (A1) -- (E1);
+
+
+  \node at (6, 6.5) {Singlet states};
+

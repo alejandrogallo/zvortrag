@@ -22,9 +22,26 @@
   \input{main_definitions.tex}
 
   \draw[annotation,dashed] ($(E1)-(.5, 2)$) -- ($(E1)-(.5,0)$)
-    node[midway, right=5pt, black ] {Exp. ?};
-  \node[right=2pt] at ($0.5*(A2)+0.5*(E3)$) {Exp. 1.945 eV};
-  \node[right=2pt] at ($0.5*(A1)+0.5*(E1)$) {Exp. 1.190 eV};
+    node[midway, right=5pt, black ] {
+      \begin{tabular}{l}
+        Exp. ? \\
+        \color{green}Calc. 0.54 eV
+      \end{tabular}
+  };
+
+  \node[right=2pt] at ($0.5*(A2)+0.5*(E3)$) {
+    \begin{tabular}{l}
+      Exp. 1.945 eV \\
+      \color{green}Calc. 2.00 eV
+    \end{tabular}
+  };
+
+  \node[right=2pt] at ($0.5*(A1)+0.5*(E1)$) {
+    \begin{tabular}{l}
+      Exp. 1.190 eV \\
+      \color{green}Calc. 0.89 eV
+    \end{tabular}
+  };
 
 
 
