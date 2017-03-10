@@ -1,4 +1,6 @@
 deps
+.vim-run
+build
 .deps
 *.pdf
 images/*pdf
