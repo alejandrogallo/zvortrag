@@ -1,38 +1,38 @@
-\begin{frame}{DMRG: Density Matrix Renormalization Group} %{{{1
+\begin{frame}{DMRG\: Density Matrix Renormalization Group} %{{{1
   \centering
-  \visible<1->{
+  \visible<1->{%
     \textbf{DFT}/\textbf{HF}
   }
-  \visible<2->{
+  \visible<2->{%
     $ \quad \Rightarrow \quad $
     $ \triplet $
   }
-  \visible<3->{
+  \visible<3->{%
     $ \quad \Rightarrow \quad $
     $ \ket{\Phi } =
      \ket \triplet $
   }
-  \visible<4->{
+  \visible<4->{%
     \begin{center}
       Only one Slater determinant?
     \end{center}
   }
-  \visible<5->{
+  \visible<5->{%
     $
       \ket{\Phi} =
       c_{1} \ket{\triplet} +
       c_{2} \ket{\tripletTwo} +
-      \ldots ?
+      \ldots?
     $
   }
-  \visible<6->{
+  \visible<6->{%
     \begin{center}
       We may be missing part of the information \ldots
     \end{center}
   }
 \end{frame}
 
-\begin{frame}{DMRG: Density Matrix Renormalization Group} %{{{1
+\begin{frame}{DMRG\: Density Matrix Renormalization Group} %{{{1
   \centering
   %
   %
@@ -41,13 +41,13 @@
   \]
   %
   %
-  \visible<2->{
+  \visible<2->{%
     $ c_{I} $ explode with the number of orbitals.
   }
-  \visible<3->{
+  \visible<3->{%
     Ansatz?
   }
-  \visible<4->{
+  \visible<4->{%
     $$
     c_{I} =
     \sum^{}_{i_{1}, i_{2}, \ldots, i_{k-1}}
@@ -59,7 +59,7 @@
     \mathbf{M}^{n_{k}}_{i_{k-1}}
     $$
   }
-  \visible<4->{
+  \visible<4->{%
     $ \mathbf{M}_{ij} $ are matrices of dimension $ M $. $ k $ is the total number of orbitals and
     $ n_{k}(I) $ the occupation of the configuration $ I $ for the state $ k $.
   }
