@@ -290,7 +290,7 @@ $(BUILD_DIR):
 	$(DEBUG)mkdir -p $@ $(FD_OUTPUT)
 
 $(BUILD_DIR)/%: $(PACKAGES_DIR)/%
-	$(ARROW) Copying TeX libraries
+	$(ARROW) Copying TeX libraries: $@
 	$(DEBUG)mkdir -p $(BUILD_DIR)
 	$(DEBUG)cp $^ $@
 
@@ -416,7 +416,7 @@ $(TOC_FILE): $(TOC_DEP)
 		$(BUILD_DIR_FLAG) $(notdir $(MAIN_SRC) ) $(FD_OUTPUT)
 
 $(TOC_DEP): $(TEXFILES)
-	$(ARROW) Parsing the toc entries
+	$(ARROW) Parsing table of contents
 	$(DEBUG)mkdir -p $(dir $@)
 	$(DEBUG)$(GREP) -E \
 		'\\(section|subsection|subsubsection|chapter|part|subsubsubsection).' \
