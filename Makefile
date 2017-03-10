@@ -438,7 +438,7 @@ $(FIGS_DEP): $(TEXFILES)
 	$(ARROW) Parsing the graphics dependencies
 	$(DEBUG)mkdir -p $(dir $@)
 	$(DEBUG)echo FIGURES = \\ > $@
-	$(DEBUG)$(GREP) -E '\\include(graphic|pdf).' $(TEXFILES)  \
+	$(DEBUG)$(GREP) --no-filename -E '\\include(graphic|pdf).' $(TEXFILES)  \
 	| $(removeTexComments) \
 	| $(SED) 's/.*{\(.*\)}.*/\1 \\/' >> $@
 
