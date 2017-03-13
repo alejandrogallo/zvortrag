@@ -1,0 +1,78 @@
+\documentclass{article}
+\usepackage{tikz}
+%%%<
+\usepackage{verbatim}
+\usepackage[active,tightpage]{preview}
+\PreviewEnvironment{center}
+\setlength\PreviewBorder{00pt}%
+%%%>
+
+
+\usetikzlibrary{calc,shapes,positioning,arrows,decorations.pathmorphing,intersections}
+\usepackage{sansmath}
+\begin{document}
+\begin{center}
+  \sansmath
+  \begin{tikzpicture}[
+    %font=\sffamily,
+    arrow/.style={black,very thick,->},
+    mainbox/.style={rectangle,black,draw=black, rounded corners},
+    annotation/.style={red,thick,<->,shorten >=4pt,shorten <=4pt,>=stealth}
+  ]
+
+  \pgfmathsetmacro{\mainsep}{1.4}
+
+  \node[mainbox] (dftnode) {
+      Constrained DFT
+  };
+
+  \node[mainbox, below=\mainsep of dftnode] (dftorbitals) {
+      $ \left \{ \epsilon_{i}, \varphi_{i} \right \}  $
+  };
+
+  \node[mainbox, below left=\mainsep of dftorbitals] (activeselect) {
+      $ \left \{ \varphi_{i} \right \}_{\mathrm{active}}  $
+  };
+
+  \node[mainbox, below right=\mainsep of dftorbitals] (inactiveselect) {
+      $ \left \{ \varphi_{i} \right \}_{\mathrm{inactive}}  $
+  };
+
+  \node[mainbox, below=\mainsep of inactiveselect] (h1node) {
+      $ \hat{h}_{ij} $
+  };
+
+  \node[mainbox, below=\mainsep of activeselect] (rpapotnode) {
+     $ W^{\mathrm{RPA}}_{ijab} $
+  };
+
+  \node[mainbox, below=4*\mainsep of dftorbitals] (dmrgnode) {
+      DMRG
+  };
+
+  \node[mainbox, right=1.4*\mainsep of dmrgnode] (statenode) {
+      State averaging
+  };
+
+  \draw[arrow] (dftnode) -- (dftorbitals);
+
+  \draw[arrow] (dftorbitals) -- (activeselect.north);
+  \draw[arrow] (activeselect) -- (rpapotnode);
+  \draw[arrow] (rpapotnode.south) -- (dmrgnode.west);
+
+  \draw[arrow] (dftorbitals) -- (inactiveselect.north);
+  \draw[arrow] (inactiveselect) -- (h1node);
+  \draw[arrow] (h1node.south) -- (dmrgnode.east);
+
+  \draw[arrow] (dmrgnode) -- (statenode);
+  \draw[arrow] (statenode.north) ..
+    controls ([yshift=1cm] statenode) and ([xshift=4cm] dftnode) ..
+    (dftnode);
+
+
+
+  \end{tikzpicture}
+\end{center}
+\end{document}
+
+% vim: nospell ft=tex
