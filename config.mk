@@ -1,2 +1,7 @@
 BUILD_DIR = build
 CHECK_SPELL =
+
+
+present: $(BUILD_DOCUMENT)
+	pdfpc $(BUILD_DOCUMENT)
+
