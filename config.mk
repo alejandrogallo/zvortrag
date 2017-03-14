@@ -3,5 +3,5 @@ CHECK_SPELL =
 
 
 present: $(BUILD_DOCUMENT)
-	pdfpc $(BUILD_DOCUMENT)
+	nohup pdfpc $(BUILD_DOCUMENT) &> /dev/null &
 
