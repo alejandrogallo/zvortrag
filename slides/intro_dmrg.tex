@@ -30,7 +30,7 @@
   }
   \visible<4->{%
     \begin{center}
-      Only one Slater determinant?
+      One Slater determinant.
     \end{center}
   }
   \visible<5->{%
@@ -48,36 +48,4 @@
   }
 \end{frame}
 
-\begin{frame}{DMRG\: Density Matrix Renormalization Group} %{{{1
-  \centering
-  %
-  %
-  \[
-  \ket{\Phi} = \sum^{}_{I} c_{I} \ket{I}, \qquad \mbox{ $ I $ is a configuration}
-  \]
-  %
-  %
-  \visible<2->{%
-    $ c_{I} $ explode with the number of orbitals.
-  }
-  \visible<3->{%
-    Ansatz?
-  }
-  \visible<4->{%
-    $$
-    c_{I} =
-    \sum^{}_{i_{1}, i_{2}, \ldots, i_{k-1}}
-    \mathbf{M}^{n_{1}}_{i_{1}}
-    \mathbf{M}^{n_{2}}_{i_{1}i_{2}}
-    \mathbf{M}^{n_{3}}_{i_{2}i_{3}}
-    \cdots
-    \mathbf{M}^{n_{k-1}}_{i_{k-2}i_{k-1}}
-    \mathbf{M}^{n_{k}}_{i_{k-1}}
-    $$
-  }
-  \visible<4->{%
-    $ \mathbf{M}_{ij} $ are matrices of dimension $ M $. $ k $ is the total number of orbitals and
-    $ n_{k}(I) $ the occupation of the configuration $ I $ for the state $ k $.
-  }
-\end{frame}
 

@@ -2,7 +2,8 @@
 %%%%%%%%%%%%%%%%%%%%
 
 %\documentclass[notes=show]{beamer}
-\documentclass[notes=hide]{beamer}
+%\documentclass[notes=hide]{beamer}
+\documentclass[notes=hide,handout]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
@@ -65,7 +66,7 @@
 %\input{slides/intro_dft.tex}
 %\input{slides/intro_nv_dangling.tex}
 \input{slides/intro_nv_levels.tex}
-\input{slides/intro_nv_qubit.tex}
+%\input{slides/intro_nv_qubit.tex}
 %\input{slides/intro_zfs.tex}
 %\input{slides/intro_zpl.tex}
 
@@ -73,18 +74,7 @@
 %\section{Hexagonal diamond and defects} %{{{1
 %\input{slides/intro_hexagonal.tex}
 
-\begin{frame}{DFT + DMRG}
-  \includegraphics[width=\textwidth]{images/dmrg_algo_chart.pdf}
-  \note{
 
-    In the following approach we start by performing a constrained DFT
-    calculation.
-
-    We construct a screened potential considering range-separated hybrid
-    functionals with parameters optimized for diamond.
-
-  }
-\end{frame}
 
 %\section{Results} %{{{1
 %\input{slides/results_gs_3A2.tex}
@@ -95,9 +85,13 @@
 %\input{slides/results_zfs_xv.tex}
 %\input{slides/results_structure_split.tex}
 %\input{slides/results_strain.tex}
-%\input{slides/intro_dmrg.tex}
-\input{slides/results_dmrg.tex}
+\input{slides/intro_dmrg.tex}
+\input{slides/intro_dmrg_ansatz.tex}
+\input{slides/dmrg_dft_algo.tex}
 
+
+
+\input{slides/results_dmrg.tex}
 
 %\section{Summary and outlook} %{{{1
 \input{slides/summary.tex}
