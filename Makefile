@@ -1,6 +1,6 @@
 
-MAKEFILE_VERSION = v1.5.6
-MAKEFILE_DATE = 13-03-2017 23:08
+MAKEFILE_VERSION = v1.5.7
+MAKEFILE_DATE = 28-03-2017 14:23
 
 ## <<HELP
 #
@@ -205,8 +205,6 @@ $(shell $(WHICH) okular 2> /dev/null),\
 $(shell $(WHICH) xdg-open 2> /dev/null),\
 $(shell $(WHICH) open 2> /dev/null),\
 )
-# Filename for the merged TeXfile
-MERGE_MAIN_SRC  ?= $(patsubst %.tex,%_merged.tex,$(MAIN_SRC))
 
 .DEFAULT_GOAL   := all
 
@@ -551,20 +549,6 @@ releases: $(BUILD_DOCUMENT) ## Create all releases (according to tags)
 		--prefix=$$tag/ $$tag > $(RELEASES_DIR)/$$tag.$(RELEASES_FMT); \
 	done
 
-# =====
-# Merge
-# =====
-#
-# Create a TeX file with all included TeX files have been merged into it.
-#
-merge: $(MERGE_MAIN_SRC) ## Create a TeX file with all included files merged
-$(MERGE_MAIN_SRC): $(BUILD_DOCUMENT)
-	$(DEBUG){\
-		for i in $(TEXFILES); do \
-			echo $$i; \
-		done \
-	}
-
 # ============
 # Distribution
 # ============
@@ -596,6 +580,7 @@ dist: $(BUILD_DOCUMENT) ## Create a dist folder with the bare minimum to compile
 	$(DEBUG)echo $(DEPENDENCIES)\
 		| $(TR) " " "\n" \
 		| $(XARGS) -n1 -I FF cp -r FF $(DIST_DIR)/FF
+ifneq ($(strip $(PACKAGES_FILES)),)
 	$(ARROW) "Creating folder for latex libraries"
 	$(DEBUG)test -n "$(PACKAGES_FILES)" && echo $(PACKAGES_FILES)\
 		| $(XARGS) -n1 dirname\
@@ -604,6 +589,16 @@ dist: $(BUILD_DOCUMENT) ## Create a dist folder with the bare minimum to compile
 	$(DEBUG)test -n "$(PACKAGES_FILES)" && echo $(PACKAGES_FILES)\
 		| $(TR) " " "\n" \
 		| $(XARGS) -n1 -I FF cp FF $(DIST_DIR)/FF
+endif
+
+# ==================
+# Distribution clean
+# ==================
+#
+# Clean distribution files
+#
+dist-clean: CLEAN_FILES=$(DIST_DIR) ## Clean distribution files
+dist-clean: clean
 
 DIFF ?=HEAD HEAD~1
 NEW_COMMIT = $(word 1,$(DIFF))
