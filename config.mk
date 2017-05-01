@@ -1,5 +1,5 @@
 BUILD_DIR = build
-CHECK_SPELL =
+CHECK_SPELL = 1
 DIST_DIR = $(shell git describe --tags)
 
 
