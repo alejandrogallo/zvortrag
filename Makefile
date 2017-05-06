@@ -1,7 +1,7 @@
 
 # File: common-makefile/src/version.m4
-MAKEFILE_VERSION = v1.6-7-g60fd0d5
-MAKEFILE_DATE = 01-05-2017 20:04
+MAKEFILE_VERSION = v1.7-6-gfe6370d
+MAKEFILE_DATE = 07-05-2017 01:44
 MAKEFILE_AUTHOR = Alejandro Gallo
 MAKEFILE_URL = https://github.com/alejandrogallo/latex-makefile
 MAKEFILE_LICENSE = GPLv3
@@ -260,7 +260,7 @@ endef
 
 # Remove comments from some file, this variables is intended to be put
 # in a shell call for processing of TeX files
-removeTexComments=$(SED) "s/[^\\]%.*//g; s/^%.*//g"
+removeTexComments=$(SED) "s/\([^\\]\)%.*/\1/g; s/^%.*//g"
 
 TEX_INCLUDES_REGEX = \in\(clude\|put\)\s*[{]\s*
 define recursiveDiscoverIncludes
@@ -468,7 +468,7 @@ BUILD_DIR_FLAG  ?= $(if \
                    .,$(strip $(BUILD_DIR))),-output-directory $(BUILD_DIR))
 
 $(BUILD_DIR):
-	$(ARROW) Creating the $@ directory
+	$(ECHO) $(call print-cmd-name,mkdir) $@
 	$(DBG_FLAG)mkdir -p $@ $(FD_OUTPUT)
 
 
@@ -829,13 +829,13 @@ DIST_DIR ?= $(PREFIX)/dist
 # configuration.
 #
 dist: $(BUILD_DOCUMENT) ## Create a dist folder with the bare minimum to compile
-	$(ARROW) "Creating dist folder"
+	$(ECHO) $(call print-cmd-name,mkdir) $(DIST_DIR)
 	$(DBG_FLAG)mkdir -p $(DIST_DIR)
-	$(ARROW) "Copying the Makefile"
+	$(ECHO) $(call print-cmd-name,cp) $(DIST_DIR)/Makefile
 	$(DBG_FLAG)cp Makefile $(DIST_DIR)/
-	$(ARROW) "Copying the target document"
+	$(ECHO) $(call print-cmd-name,cp) $(DIST_DIR)/$(BUILD_DOCUMENT)
 	$(DBG_FLAG)cp $(BUILD_DOCUMENT) $(DIST_DIR)/
-	$(ARROW) "Copying .bib files"
+	$(ARROW) "Copying bib files"
 	$(DBG_FLAG)test -n "$(BIBTEX_FILES)" && {\
 		for bibfile in $(BIBTEX_FILES); do \
 			mkdir -p $(DIST_DIR)/$$(dirname $$bibfile); \
@@ -847,7 +847,7 @@ dist: $(BUILD_DOCUMENT) ## Create a dist folder with the bare minimum to compile
 		| $(XARGS) -n1 dirname\
 		| $(XARGS) -n1 -I FF mkdir -p $(DIST_DIR)/FF
 	$(ARROW) "Copying dependencies"
-	$(DBG_FLAG)echo $(DEPENDENCIES)\
+	-$(DBG_FLAG)echo $(DEPENDENCIES)\
 		| $(TR) " " "\n" \
 		| $(XARGS) -n1 -I FF cp -r FF $(DIST_DIR)/FF
 ifneq ($(strip $(PACKAGES_FILES)),)
@@ -869,6 +869,45 @@ endif
 #
 dist-clean: CLEAN_FILES=$(DIST_DIR) ## Clean distribution files
 dist-clean: clean
+
+
+
+
+
+# File: merge.m4
+# Name of the merged file
+MERGE_FILE = merged.tex
+
+# =====
+# Merge
+# =====
+#
+# Merge all include files into one single tex file
+#
+merge: $(MERGE_FILE) ## Create a merged file
+$(MERGE_FILE): $(TEXFILES)
+	$(ECHO) $(call print-cmd-name,CP) $@
+	$(DBG_FLAG)cp $(MAIN_SRC) $@
+	$(ECHO) $(call print-cmd-name,m4) $(@)
+	$(DBG_FLAG)$(FD_OUTPUT)for texfile in $(TEXFILES); do\
+			cat $@ | \
+			$(removeTexComments) | \
+			$(SED) "s/[\\]in\(put\|clude\)\s*{\(.*\)}/include(\2)/" | \
+			m4 | tee $@; \
+		done
+
+# Directory for merged distribution
+MERGE_DIST_DIR = merged_$(DIST_DIR)
+
+# ===================
+# Merged distribution
+# ===================
+#
+# Create a distribution with only a tex file
+#
+merge-dist: merge ## Create a merged file distribution
+	$(DBG_FLAG)$(MAKE) --no-print-directory \
+		dist MAIN_SRC=$(MERGE_FILE) DIST_DIR=$(MERGE_DIST_DIR)
 
 
 
