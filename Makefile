@@ -1,7 +1,7 @@
 
 # File: common-makefile/src/version.m4
-MAKEFILE_VERSION = v1.7-6-gfe6370d
-MAKEFILE_DATE = 07-05-2017 01:44
+MAKEFILE_VERSION = v1.5.8
+MAKEFILE_DATE = 08-02-2018 13:22
 MAKEFILE_AUTHOR = Alejandro Gallo
 MAKEFILE_URL = https://github.com/alejandrogallo/latex-makefile
 MAKEFILE_LICENSE = GPLv3
@@ -76,10 +76,14 @@ UNIQ ?= uniq
 MAKE ?= $(or $(MAKE),make)
 # `rm` command
 RM ?= rm
-# For creating tags
+# C++ compiler
 CXX ?= g++
-# For creating tags
+# C compiler
 CC ?= gcc
+# Fortran compiler
+FC ?= gfortran
+# M4 compiler
+M4 ?= m4
 
 
 
@@ -88,8 +92,6 @@ CC ?= gcc
 BUILD_DIR ?= .
 # Shell utilities
 LATEX ?= pdflatex
-# For creating differences
-LATEXDIFF ?= latexdiff
 # Main pdflatex engine
 PDFLATEX ?= pdflatex
 
@@ -222,6 +224,30 @@ PREFIX ?= $(PWD)
 .DEFAULT_GOAL := all
 
 # File: libraries.m4
+# File: src/build-dir.m4
+
+
+# Folder to build the project
+BUILD_DIR ?= .
+
+# Build dir flag for latex.
+# If `BUILD_DIR = .` then `BUILD_DIR_FLAG` is not defined,
+# else `BUILD_DIR = -output-directory $(BUILD_DIR)`
+BUILD_DIR_FLAG  ?= $(if \
+                   $(filter-out \
+                   .,$(strip $(BUILD_DIR))),-output-directory $(BUILD_DIR))
+
+$(BUILD_DIR):
+	$(ECHO) $(call print-cmd-name,mkdir) $@
+	$(DBG_FLAG)mkdir -p $@ $(FD_OUTPUT)
+	$(DBG_FLAG)for i in $(TEXFILES); do \
+		mkdir -p $@/$$(dirname $$i); \
+	done $(FD_OUTPUT)
+
+
+
+
+
 
 
 # Tex libraries directory
@@ -470,6 +496,10 @@ BUILD_DIR_FLAG  ?= $(if \
 $(BUILD_DIR):
 	$(ECHO) $(call print-cmd-name,mkdir) $@
 	$(DBG_FLAG)mkdir -p $@ $(FD_OUTPUT)
+	$(DBG_FLAG)for i in $(TEXFILES); do \
+		mkdir -p $@/$$(dirname $$i); \
+	done $(FD_OUTPUT)
+
 
 
 
@@ -723,11 +753,27 @@ PANDOC ?= pandoc
 # This creates a revealjs presentation using the the pandoc program stored in
 # the make variable PANDOC.
 #
-revealjs: $(MAIN_SRC)
+revealjs: reveal.js $(TEXFILES)
 	$(ARROW) Creating revealjs presentation...
+	$(DBG_FLAG)$(PANDOC) \
+		--mathjax -s \
+		-f latex -t revealjs \
+		--section-divs \
+		--variable theme="$(REVEALJS_THEME)" \
+		--variable transition="$(REVEALJS_TRANSITION)" \
+		$(MAIN_SRC) -o $(BUILD_DOCUMENT)
+
+reveal.js:
 	$(ARROW) Gettin revealjs from $(REVEALJS_SRC)
-	$(GIT) clone --depth=1 $(REVEALJS_SRC) && rm -rf reveal.js/.git
-	$(PANDOC) --mathjax -s -f latex -t revealjs $(MAIN_SRC) -o $(BUILD_DOCUMENT)
+	$(DBG_FLAG)$(GIT) clone --depth=1 $(REVEALJS_SRC) && \
+		rm -rf reveal.js/.git && \
+		cp reveal.js/js/reveal.js reveal.js/js/reveal.min.js && \
+		cp reveal.js/css/reveal.css reveal.js/css/reveal.min.css
+
+
+# (beige black blood league moon night serif simple sky solarized white)
+REVEALJS_THEME ?= solarized
+REVEALJS_TRANSITION ?= linear
 REVEALJS_SRC ?= https://github.com/hakimel/reveal.js/
 
 # =================
@@ -817,7 +863,7 @@ releases: $(BUILD_DOCUMENT) ## Create all releases (according to tags)
 
 
 # Distribution directory
-DIST_DIR ?= $(PREFIX)/dist
+DIST_DIR ?= dist
 
 # ============
 # Distribution
@@ -916,6 +962,10 @@ merge-dist: merge ## Create a merged file distribution
 # File: diff.m4
 
 
+.PHONY: diff
+# For creating differences in a repository
+LATEXDIFF ?= latexdiff-git
+# Commits to compute the difference from
 DIFF ?=HEAD HEAD~1
 NEW_COMMIT = $(word 1,$(DIFF))
 OLD_COMMIT = $(word 2,$(DIFF))
@@ -937,24 +987,25 @@ DIFF_SRC_NAME  ?= diff.tex
 # HEAD. You can also provide a *commit hash*. The default value is `HEAD HEAD~1`.
 #
 # The target creates a distribution folder located in the variable
-# DIFF_BUILD_DIR. *Warning*: It only works for single document tex projects.
+# `DIFF_BUILD_DIR`.
 diff: ## Create a latexdiff using git versions
 	$(ARROW) Creating diff between $(NEW_COMMIT) and $(OLD_COMMIT)
-	$(DBG_FLAG)mkdir -p $(DIFF_BUILD_DIR)
-	git checkout $(NEW_COMMIT) $(MAIN_SRC)
-	cp $(MAIN_SRC) $(DIFF_BUILD_DIR)/$(strip $(MAIN_SRC)).$(NEW_COMMIT)
-	git checkout $(OLD_COMMIT) $(MAIN_SRC)
-	cp $(MAIN_SRC) $(DIFF_BUILD_DIR)/$(strip $(MAIN_SRC)).$(OLD_COMMIT)
-	$(LATEXDIFF) \
-		$(DIFF_BUILD_DIR)/$(strip $(MAIN_SRC)).$(OLD_COMMIT) \
-		$(DIFF_BUILD_DIR)/$(strip $(MAIN_SRC)).$(NEW_COMMIT) \
-		> $(DIFF_SRC_NAME)
-	$(MAKE) dist \
+	$(DBG_FLAG){ \
+		temp=$$(mktemp -d); \
+		$(LATEXDIFF) \
+			-r $(NEW_COMMIT) \
+			-r $(OLD_COMMIT) $(MAIN_SRC) -d $${temp} $(FD_OUTPUT); \
+		cp $${temp}/$(MAIN_SRC) $(DIFF_SRC_NAME); \
+	} $(FD_OUTPUT)
+	$(ARROW) Building in $(DIFF_BUILD_DIR)
+	$(DBG_FLAG)$(MAKE) dist \
 		BUILD_DIR=$(DIFF_BUILD_DIR) \
 		MAIN_SRC=$(DIFF_SRC_NAME) \
 		DIST_DIR=$(DIFF_BUILD_DIR)
-	rm $(DIFF_SRC_NAME) $(patsubst %.tex,%.pdf,$(DIFF_SRC_NAME))
-	git checkout HEAD $(MAIN_SRC)
+
+
+
+
 
 
 
@@ -963,9 +1014,13 @@ diff: ## Create a latexdiff using git versions
 # File: spelling.m4
 
 
+# Speller program to use
 SPELLER ?= aspell
+# Directory to store spelling related information
 SPELL_DIR ?= .spell
+# Language for the spelling program
 SPELL_LANG ?= en
+# Wether or not spelling should be checked
 CHECK_SPELL ?=
 
 # ==============
@@ -979,6 +1034,13 @@ CHECK_SPELL ?=
 # SPELL_LANG = fr
 # ```
 # if you happen to write in french.
+#
+# Wether to check spelling or not is controlled by the `CHECK_SPELL`
+# variable, so if you want to check spelling set it to one
+# ```make
+# CHECK_SPELL = 1
+# ```
+# otherwise do not set it.
 #
 spelling: $(TEXFILES) ## Check spelling of latex sources
 	$(ARROW) Checking the spelling in $(SPELL_LANG)
