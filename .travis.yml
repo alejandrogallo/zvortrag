@@ -1,0 +1,23 @@
+sudo: required
+dist: trusty
+before_install:
+- sudo apt-get -qq update
+- sudo apt-get install -y texlive
+- sudo apt-get install -y make
+- sudo apt-get install -y latexdiff
+- sudo apt-get install -y asymptote
+- sudo apt-get install -y gnuplot
+- sudo apt-get install -y git
+- sudo pip install matplotlib
+- sudo apt-get install -y texlive-fonts-recommended texlive-latex-extra
+  texlive-fonts-extra dvipng texlive-latex-recommended
+script:
+  make
+deploy:
+  provider: releases
+  api_key:
+    secure: Ggu0Gtt9gxYQOvBZzQqzj4t4ZTQ0GoDQpjMcH1RzyZwSNDbmaeayGSrTb3kBmH1VxECArdKPaytjQ7LVUo7vXSMx91vuv6WgZb85hakaN4nz9JpLnKviB7OD3yCeH7ZHhWksBIwQD5TwMQB6lfCAJUjJOHUkDkumeyp1ahfP5iMEA9ku0uBxfkmSjhoOej7VACtm04TDeT24dCzdPOCoXQoqLZhl9z+M8c94Pte6EEv8xN7NiB3wSvM13kATZ00akgleqKula4kixE9LDS+prduJspPrTb7auAIdZCvHySZZ883gNlXxJQgRiju/NcmFEXGXAmVNpYkcThOsIt0UPkEnRYp5ch03ReXSjxUgJzWwilICjiPskBuJbg2D+W62WGEsEgwmb8z9H1h8LoZTNaF7WISSCavoTvRI4/vzljFtCjGJVJucdIpmju4P2ZsT1XGbB5B0F3M3YvbaKhrjqY0Kzms8mskt1FwSGEJpsSDXl0ld9O3SkW8418siKOQTJOjU6+QNwsW6HrX8laTcecJKgG6dGBOFBeK2RP+kMk78O+RmwSB+uS768+JS+SGYSCKivlV5hTReueJ7MwZxbYGn4suepz6aiPJV3F+8tBzTBtMqjlyWKhgFOFcEaoyzHhPjpwtbRYu972Jr+KCePd120Zb4E5hma30jALm4Z90=
+  file: 'main.pdf'
+  skip_cleanup: true
+  on:
+    repo: alejandrogallo/zvortrag
